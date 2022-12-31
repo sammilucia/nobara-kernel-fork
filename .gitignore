@@ -1,1 +1,5 @@
-linux-6.*.tar.xz
+x86_x64/ 
+kernel-*/
+linux-*.tar.xz
+.build*
+*.rpm
