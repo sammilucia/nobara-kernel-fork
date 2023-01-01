@@ -121,18 +121,18 @@ Summary: The Linux kernel
 #  to build the base kernel using the debug configuration. (Specifying
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
-%define buildid .fsync
-%define specversion 6.0.15
+%define buildid .fsynctest
+%define specversion 6.0.16
 %define patchversion 6.0
-%define pkgrelease 300
+%define pkgrelease 200
 %define kversion 6
-%define tarfile_release 6.0.15
+%define tarfile_release 6.0.16
 # This is needed to do merge window version magic
 %define patchlevel 0
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 304%{?buildid}%{?dist}
+%define specrelease 200%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.0.15
+%define kabiversion 6.0.16
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -570,6 +570,7 @@ ExclusiveOS: Linux
 Requires: kernel-core-uname-r = %{KVERREL}
 Requires: kernel-modules-uname-r = %{KVERREL}
 %endif
+# enable apparmour
 Requires: apparmor-utils
 Requires: apparmor-parser
 
@@ -866,6 +867,7 @@ Source4002: gating.yaml
 %if !%{nopatches}
 
 Patch1: patch-%{patchversion}-redhat.patch
+%endif
 
 # linux-fsync patches
 Patch200: tkg.patch
@@ -902,9 +904,6 @@ Patch405: mt76:-mt7921:-Disable-powersave-features-by-default.patch
 Patch408: 0001-acpi-proc-idle-skip-dummy-wait.patch
 Patch409: 0001-drm-i915-quirks-disable-async-flipping-on-specific-d.patch
 Patch410: v8-0-4-PCI-vmd-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
-
-
-%endif
 
 # empty final patch to facilitate testing of kernel patches
 Patch999999: linux-kernel-test.patch
@@ -1477,6 +1476,7 @@ cp -a %{SOURCE1} .
 %if !%{nopatches}
 
 ApplyOptionalPatch patch-%{patchversion}-redhat.patch
+%endif
 
 # linux-fsync patches
 ApplyOptionalPatch tkg.patch
@@ -1513,8 +1513,6 @@ ApplyOptionalPatch mt76:-mt7921:-Disable-powersave-features-by-default.patch
 ApplyOptionalPatch 0001-acpi-proc-idle-skip-dummy-wait.patch
 ApplyOptionalPatch 0001-drm-i915-quirks-disable-async-flipping-on-specific-d.patch
 ApplyOptionalPatch v8-0-4-PCI-vmd-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
-
-%endif
 
 ApplyOptionalPatch linux-kernel-test.patch
 
@@ -1981,6 +1979,7 @@ BuildKernel() {
 %endif
 
     # Files for 'make scripts' to succeed with kernel-devel.
+    # +++snip SElinux+++
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/tools/include/tools
     cp -a --parents tools/include/tools/be_byteshift.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     cp -a --parents tools/include/tools/le_byteshift.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
@@ -1993,6 +1992,7 @@ BuildKernel() {
     cp --parents tools/build/fixdep.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     cp --parents tools/objtool/sync-check.sh $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     cp -a --parents tools/bpf/resolve_btfids $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
+    # +++snip SElinux+++
 
     cp -a --parents tools/include/asm-generic $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     cp -a --parents tools/include/linux $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
@@ -3251,8 +3251,8 @@ fi
 #
 #
 %changelog
-* Thu Dec 22 2022 Jan Drögehoff <sentrycraft123@gmail.com> - 6.0.15-301.fsync
-- kernel-fsync v6.0.15
+* Sat Dec 31 2022 Justin M. Forbes <jforbes@fedoraproject.org> [6.0.16-0]
+- Linux v6.0.16
 
 * Wed Dec 21 2022 Justin M. Forbes <jforbes@fedoraproject.org> [6.0.15-0]
 - ovl: update ->f_iocb_flags when ovl_change_flags() modifies ->f_flags (Al Viro)
