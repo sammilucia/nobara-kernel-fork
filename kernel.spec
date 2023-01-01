@@ -570,7 +570,6 @@ ExclusiveOS: Linux
 Requires: kernel-core-uname-r = %{KVERREL}
 Requires: kernel-modules-uname-r = %{KVERREL}
 %endif
-# enable apparmour
 Requires: apparmor-utils
 Requires: apparmor-parser
 
@@ -1979,7 +1978,7 @@ BuildKernel() {
 %endif
 
     # Files for 'make scripts' to succeed with kernel-devel.
-    # +++snip SElinux+++
+    # ---snip SElinux---
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/tools/include/tools
     cp -a --parents tools/include/tools/be_byteshift.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     cp -a --parents tools/include/tools/le_byteshift.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
@@ -1992,7 +1991,7 @@ BuildKernel() {
     cp --parents tools/build/fixdep.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     cp --parents tools/objtool/sync-check.sh $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     cp -a --parents tools/bpf/resolve_btfids $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
-    # +++snip SElinux+++
+    # ---snip SElinux---
 
     cp -a --parents tools/include/asm-generic $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     cp -a --parents tools/include/linux $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
