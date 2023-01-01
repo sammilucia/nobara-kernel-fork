@@ -3,3 +3,5 @@ kernel-*/
 linux-*.tar.xz
 .build*
 *.rpm
+*.bz2
+*.tz
