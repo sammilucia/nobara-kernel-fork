@@ -29,7 +29,6 @@
  drivers/pci/pcie/ptm.c                             | 300 ++++++++++++---------
  drivers/pci/quirks.c                               |  24 ++
  drivers/usb/core/hub.c                             |   7 +
- fs/overlayfs/file.c                                |   1 +
  include/linux/efi.h                                |  22 +-
  include/linux/lsm_hook_defs.h                      |   2 +
  include/linux/lsm_hooks.h                          |   6 +
@@ -46,10 +45,10 @@
  security/lockdown/Kconfig                          |  13 +
  security/lockdown/lockdown.c                       |   1 +
  security/security.c                                |   6 +
- 48 files changed, 768 insertions(+), 367 deletions(-)
+ 47 files changed, 767 insertions(+), 367 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index ff8d88b11391..ff74e2bc5668 100644
+index 0104f69d30bb..20a377175eed 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -18,6 +18,10 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -332,7 +331,7 @@ index bbf7029e224b..cf7faa970dd6 100644
  		dmi_decode_ipmi((const struct dmi_header *) dev->device_data);
 
 diff --git a/drivers/char/ipmi/ipmi_msghandler.c b/drivers/char/ipmi/ipmi_msghandler.c
-index c9e32d100b7e..bfe9bd1fde24 100644
+index b151cbfc3d9b..8ec5772f8bb0 100644
 --- a/drivers/char/ipmi/ipmi_msghandler.c
 +++ b/drivers/char/ipmi/ipmi_msghandler.c
 @@ -35,6 +35,7 @@
@@ -343,7 +342,7 @@ index c9e32d100b7e..bfe9bd1fde24 100644
  #include <linux/delay.h>
 
  #define IPMI_DRIVER_VERSION "39.2"
-@@ -5520,8 +5521,21 @@ static int __init ipmi_init_msghandler_mod(void)
+@@ -5522,8 +5523,21 @@ static int __init ipmi_init_msghandler_mod(void)
  {
  	int rv;
 
@@ -1270,7 +1269,7 @@ index 49238ddd39ee..5d8c37c3e15a 100644
  	if (!pci_dev->driver)
  		return 0;
 diff --git a/drivers/pci/pci.c b/drivers/pci/pci.c
-index 95bc329e74c0..107afa0a5b03 100644
+index a484da1a9c66..29dc20615d36 100644
 --- a/drivers/pci/pci.c
 +++ b/drivers/pci/pci.c
 @@ -2706,24 +2706,12 @@ int pci_prepare_to_sleep(struct pci_dev *dev)
@@ -1789,18 +1788,6 @@ index bbab424b0d55..ed86042fb57b 100644
  	/* Lock the device, then check to see if we were
  	 * disconnected while waiting for the lock to succeed. */
  	usb_lock_device(hdev);
-diff --git a/fs/overlayfs/file.c b/fs/overlayfs/file.c
-index a34f8042724c..172cde9d2e56 100644
---- a/fs/overlayfs/file.c
-+++ b/fs/overlayfs/file.c
-@@ -96,6 +96,7 @@ static int ovl_change_flags(struct file *file, unsigned int flags)
-
- 	spin_lock(&file->f_lock);
- 	file->f_flags = (file->f_flags & ~OVL_SETFL_MASK) | flags;
-+	file->f_iocb_flags = iocb_flags(file);
- 	spin_unlock(&file->f_lock);
-
- 	return 0;
 diff --git a/include/linux/efi.h b/include/linux/efi.h
 index f87b2f5db9f8..0b156c2a4ab3 100644
 --- a/include/linux/efi.h
@@ -2099,10 +2086,10 @@ index e137cf15aae9..2ed2341f7967 100755
  # Use make KBUILD_ABS_SRCTREE=1 {tags|cscope}
  # to force full paths for a non-O= build
 diff --git a/security/integrity/platform_certs/load_uefi.c b/security/integrity/platform_certs/load_uefi.c
-index b78753d27d8e..f0b37800431a 100644
+index d1fdd113450a..182e8090cfe8 100644
 --- a/security/integrity/platform_certs/load_uefi.c
 +++ b/security/integrity/platform_certs/load_uefi.c
-@@ -73,7 +73,8 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
+@@ -74,7 +74,8 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
  		return NULL;
 
  	if (*status != EFI_BUFFER_TOO_SMALL) {
@@ -2112,7 +2099,7 @@ index b78753d27d8e..f0b37800431a 100644
  		return NULL;
  	}
 
-@@ -84,7 +85,8 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
+@@ -85,7 +86,8 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
  	*status = efi.get_variable(name, guid, NULL, &lsize, db);
  	if (*status != EFI_SUCCESS) {
  		kfree(db);
@@ -2175,30 +2162,3 @@ index 4b95de24bc8d..10047790e96e 100644
  #ifdef CONFIG_PERF_EVENTS
  int security_perf_event_open(struct perf_event_attr *attr, int type)
  {
-From 90c4bd0059367922f88768784bfb7c5ec1bc846c Mon Sep 17 00:00:00 2001
-From: "Justin M. Forbes" <jforbes@fedoraproject.org>
-Date: Thu, 3 Nov 2022 11:34:03 -0500
-Subject: [PATCH] Revert "disable enum64 BTF in fedora rawhide"
-
-This option is not supported by older pahole versions.
-
-This reverts commit 7ab8e0d8b46b7f768e37f8ff39ccae2ecc897396.
----
- scripts/pahole-flags.sh | 3 ---
- 1 file changed, 3 deletions(-)
-
-diff --git a/scripts/pahole-flags.sh b/scripts/pahole-flags.sh
-index 81c8e082ec57..0d99ef17e4a5 100755
---- a/scripts/pahole-flags.sh
-+++ b/scripts/pahole-flags.sh
-@@ -20,7 +20,4 @@ if [ "${pahole_ver}" -ge "122" ]; then
- 	extra_paholeopt="${extra_paholeopt} -j"
- fi
-
--# temporary workaround to disable enum64
--extra_paholeopt="${extra_paholeopt} --skip_encoding_btf_enum64"
--
- echo ${extra_paholeopt}
--- 
-2.37.3
-

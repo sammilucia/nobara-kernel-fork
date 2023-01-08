@@ -121,18 +121,18 @@ Summary: The Linux kernel
 #  to build the base kernel using the debug configuration. (Specifying
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
-%define buildid .fsynctest
-%define specversion 6.0.16
+%define buildid .nobara
+%define specversion 6.0.18
 %define patchversion 6.0
 %define pkgrelease 200
 %define kversion 6
-%define tarfile_release 6.0.16
+%define tarfile_release 6.0.18
 # This is needed to do merge window version magic
 %define patchlevel 0
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 200%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.0.16
+%define kabiversion 6.0.18
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -3250,6 +3250,12 @@ fi
 #
 #
 %changelog
+* Sat Jan 07 2023 Justin M. Forbes <jforbes@fedoraproject.org> [6.0.18-0]
+- Linux v6.0.18
+
+* Wed Jan 04 2023 Justin M. Forbes <jforbes@fedoraproject.org> [6.0.17-0]
+- Linux v6.0.17
+
 * Sat Dec 31 2022 Justin M. Forbes <jforbes@fedoraproject.org> [6.0.16-0]
 - Linux v6.0.16
 
