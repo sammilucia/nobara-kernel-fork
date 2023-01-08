@@ -879,20 +879,15 @@ Patch206: amdgpu-si-cik-default.patch
 Patch207: acso.patch
 
 # Fix MG-LRU regression
-Patch264: mm-support-posix_fadv_noreuse.patch-added-to-mm-unstable-branch.patch
+#Patch264: mm-support-posix_fadv_noreuse.patch-added-to-mm-unstable-branch.patch
 
 # device specific patches
-Patch300: linux-surface.patch
-Patch301: steam-deck.patch
-Patch302: asus-linux.patch
 
 # temporary patches
 Patch401: 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
-Patch403: v3-1-7-acpi-x86-s2idle-Move-_HID-handling-for-AMD-systems-into-structures.patch
 Patch405: mt76_-mt7921_-Disable-powersave-features-by-default.patch
 Patch408: 0001-acpi-proc-idle-skip-dummy-wait.patch
-Patch409: 0001-drm-i915-quirks-disable-async-flipping-on-specific-d.patch
-Patch410: v8-0-4-PCI-vmd-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
+#Patch410: v8-0-4-PCI-vmd-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
 
 # gamescope HDR
 Patch411: 0001-HDR-testing.patch
@@ -1479,20 +1474,15 @@ ApplyOptionalPatch amdgpu-si-cik-default.patch
 ApplyOptionalPatch acso.patch
 
 # Fix MG-LRU regression
-Patch264: mm-support-posix_fadv_noreuse.patch-added-to-mm-unstable-branch.patch
+#Patch264: mm-support-posix_fadv_noreuse.patch-added-to-mm-unstable-branch.patch
 
 # device specific patches
-ApplyOptionalPatch linux-surface.patch
-ApplyOptionalPatch steam-deck.patch
-ApplyOptionalPatch asus-linux.patch
 
 # temporary patches
 ApplyOptionalPatch 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
-ApplyOptionalPatch v3-1-7-acpi-x86-s2idle-Move-_HID-handling-for-AMD-systems-into-structures.patch
 ApplyOptionalPatch mt76_-mt7921_-Disable-powersave-features-by-default.patch
 ApplyOptionalPatch 0001-acpi-proc-idle-skip-dummy-wait.patch
-ApplyOptionalPatch 0001-drm-i915-quirks-disable-async-flipping-on-specific-d.patch
-ApplyOptionalPatch v8-0-4-PCI-vmd-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
+#ApplyOptionalPatch v8-0-4-PCI-vmd-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
 
 # gamescope HDR
 ApplyOptionalPatch 0001-HDR-testing.patch
