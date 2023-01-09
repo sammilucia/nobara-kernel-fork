@@ -124,16 +124,16 @@ Summary: The Linux kernel
 #  to build the base kernel using the debug configuration. (Specifying
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
-%define buildid .fsynctest
+%define buildid .nobaratest
 %define specversion 6.1.4
 %define patchversion 6.1
-%define pkgrelease 200
+%define pkgrelease 201
 %define kversion 6
 %define tarfile_release 6.1.4
 # This is needed to do merge window version magic
 %define patchlevel 1
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 200%{?buildid}%{?dist}
+%define specrelease 201%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.1.4
 
@@ -871,26 +871,97 @@ Source4002: gating.yaml
 Patch1: patch-%{patchversion}-redhat.patch
 %endif
 
+# already applied
+# urgent
+#Patch50: 0001-futex-Fix-futex_waitv-hrtimer-debug-object-leak-on-kcalloc-error.patch
+#Patch51: 0001-perf-core-Call-LSM-hook-after-copying-perf_event_attr.patch
+#Patch52: 0001-x86-kprobes-Fix-optprobe-optimization-check-with-CONFIG_RETHUNK.patch
+#Patch53: 0001-x86vdso-Conditionally-export-__vdso_sgx_enter_enclave.patch
+# important
+#Patch101: 0001-Merge-branch-pm-cpufreq-into-linux-next.patch
+# pm next
+#Patch207: 0001-pm-6.2-rc1-Power-management-updates.patch
+# Splitlock misery mode rollback
+#Patch107: 0001-x86_splitlock_for_6.2-Add-a-sysctl-to-control-the-split-lock-misery-mode.patch
+# acpi next
+#Patch201: 0001-acpi-6.2-rc1-ACPI-updates.patch
+#Patch202: 0002-acpi-6.2-rc1-2-More-ACPI-updates.patch
+#Patch203: 0003-acpi-6.2-rc2-ACPI-fixes.patch
+# LG-MRU further improvements
+#Patch205: 0001-mm-support-POSIX_FADV_NOREUSE.patch
+# 715x speedup to kallsyms
+#Patch211: 0001-speed-up-kallsyms_lookup_name-by-715x.patch
+# thermal next
+#Patch213: 0002-thermal-6.2-rc1-2-More-thermal-control-updates.patch
+# E / P core tweak
+#Patch215: PATCH-0-2-cpufreq-intel_pstate-Make-HWP-calibration-work-on-all-hybrid-platforms.patch
+
+# needs rebasing
+#Patch103: 0001-x86_core_for_v6.2_Add-the-call-depth-tracking-mitigation-for-Retbleed-which-has.patch
+#Patch104: 0001-x86_mm_for_6.2_v2_Randomize-the-per-cpu-entry-areas.patch
+# lazy-RCU (reduced power in low-CPU conditions)
+#Patch204: 0000-PATCH-v9-01-13-rcu-Fix-missing-nocb-gp-wake-on-rcu_barrier.patch
+# Intel i915 drm next
+#Patch216: PULL-drm-intel-next.patch
+#Patch101: 0000-PATCH-v5-00-16-x86-make-PAT-and-MTRR-independent-from-each-other.patch
+# accelerated TLB
+#Patch215: PATCH-1-8-migrate_pages-organize-stats-with-struct-migrate_pages_stats.patch
+#Patch216: PATCH-2-8-migrate_pages-separate-hugetlb-folios-migration.patch
+#Patch217: PATCH-3-8-migrate_pages-restrict-number-of-pages-to-migrate-in-batch.patch
+#Patch218: PATCH-4-8-migrate_pages-split-unmap_and_move-to-_unmap-and-_move.patch
+#Patch219: PATCH-5-8-migrate_pages-batch-_unmap-and-_move.patch
+#Patch220: PATCH-6-8-migrate_pages-move-migrate_folio_done-and-migrate_folio_unmap.patch
+#Patch221: PATCH-7-8-migrate_pages-share-more-code-between-_unmap-and-_move.patch
+#Patch222: PATCH-8-8-migrate_pages-batch-flushing-TLB.patch
+# AMD s0i3 workaround
+#Patch701: 0001-platform-x86-amd-pmc-Add-a-workaround-for-s0i3-issue.patch
+
+Patch202: PATCH-V9-0-4-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
+
+# urgent (bugfixes)
+Patch54: 0001-perf-urgent-2023-01-06_Intel-RAPL-updates-for-new-model-IDs.patch
+Patch55: 0001-x86-bugs-Flush-IBP-in-ib_prctl_set.patch
+
+# important (performance, power management)
+Patch200: 0001-sched-core-2022-12-12-sched-Clear-ttwu_pending-after-enqueue_task.patch
+Patch201: 0001-x86_sgx_for_6.2-Introduce-SGX-feature-Asynchrounous-Exit-Notification.patch
+
+## LG-MRU further improvements
+Patch203: 0002-mm-add-vma_has_recency.patch
+
+# Intel EPB
+Patch204: 0001-x86-intel_epb-Set-Alder-Lake-N-and-Raptor-Lake-P-normal-EPB.patch
+
+## thermal next
+Patch205: 0001-thermal-6.2-rc1-Thermal-control-updates.patch
+Patch206: 0003-thermal-6.2-rc3-Thermal-control-fix.patch
+
+# BORE scheduler
+Patch300: 0001-linux6.0.y-bore1.7.5.patch
+
 # linux-fsync patches
-Patch200: tkg.patch
-Patch202: fsync.patch
-Patch203: OpenRGB.patch
-Patch206: amdgpu-si-cik-default.patch
-Patch207: acso.patch
+#Patch200: tkg.patch
+Patch302: fsync.patch
+Patch303: OpenRGB.patch
 
-# Fix MG-LRU regression
-#Patch264: mm-support-posix_fadv_noreuse.patch-added-to-mm-unstable-branch.patch
+# enable older AMD GPUs to use new amdgpu driver
+Patch301: amdgpu-si-cik-default.patch
 
-# device specific patches
+# ACS override
+Patch302: acso.patch
 
 # temporary patches
-Patch401: 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
-Patch405: mt76_-mt7921_-Disable-powersave-features-by-default.patch
-Patch408: 0001-acpi-proc-idle-skip-dummy-wait.patch
-#Patch410: v8-0-4-PCI-vmd-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
+Patch303: mt76_-mt7921_-Disable-powersave-features-by-default.patch
+Patch304: 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
+
+# remove AMD dummy wait
+Patch305: 0001-acpi-proc-idle-skip-dummy-wait.patch
+Patch306: PATCH-V9-0-4-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
 
 # gamescope HDR
-Patch411: 0001-HDR-testing.patch
+Patch307: 0001-HDR-testing.patch
+
+Patch604: 0001-HID-amd_sfh-Add-support-for-tablet-mode-switch-senso.patch
 
 # empty final patch to facilitate testing of kernel patches
 Patch999999: linux-kernel-test.patch
@@ -1418,8 +1489,8 @@ if [ "%{patches}" != "%%{patches}" ] ; then
   done
 fi 2>/dev/null
 
-patch_command='git --work-tree=. apply'
-#patch_command='patch -p1 -F2 -s'
+#patch_command='git --work-tree=. apply'
+patch_command='patch -p1 -F2 -s'
 ApplyPatch()
 {
   local patch=$1
@@ -1466,26 +1537,96 @@ cp -a %{SOURCE1} .
 ApplyOptionalPatch patch-%{patchversion}-redhat.patch
 %endif
 
+# Already applied
+## Urgent
+#ApplyOptionalPatch 0001-futex-Fix-futex_waitv-hrtimer-debug-object-leak-on-kcalloc-error.patch
+#ApplyOptionalPatch 0001-perf-core-Call-LSM-hook-after-copying-perf_event_attr.patch
+#ApplyOptionalPatch 0001-x86-kprobes-Fix-optprobe-optimization-check-with-CONFIG_RETHUNK.patch
+#ApplyOptionalPatch 0001-x86vdso-Conditionally-export-__vdso_sgx_enter_enclave.patch
+## Important
+#ApplyOptionalPatch 0001-Merge-branch-pm-cpufreq-into-linux-next.patch
+## pm next
+#ApplyOptionalPatch 0001-pm-6.2-rc1-Power-management-updates.patch
+# Splitlock misery mode rollback
+#ApplyOptionalPatch 0001-x86_splitlock_for_6.2-Add-a-sysctl-to-control-the-split-lock-misery-mode.patch
+## acpi next
+#ApplyOptionalPatch 0001-acpi-6.2-rc1-ACPI-updates.patch
+#ApplyOptionalPatch 0002-acpi-6.2-rc1-2-More-ACPI-updates.patch
+#ApplyOptionalPatch 0003-acpi-6.2-rc2-ACPI-fixes.patch
+## LG-MRU further improvements
+#Patch205: 0001-mm-support-POSIX_FADV_NOREUSE.patch
+## 715x speedup to kallsyms
+#ApplyOptionalPatch 0001-speed-up-kallsyms_lookup_name-by-715x.patch
+## thermal next
+#ApplyOptionalPatch 0002-thermal-6.2-rc1-2-More-thermal-control-updates.patch
+## E / P core tweak
+#ApplyOptionalPatch PATCH-0-2-cpufreq-intel_pstate-Make-HWP-calibration-work-on-all-hybrid-platforms.patch
+
+## needs rebasing
+#ApplyOptionalPatch 0001-x86_core_for_v6.2_Add-the-call-depth-tracking-mitigation-for-Retbleed-which-has.patch
+#ApplyOptionalPatch 0001-x86_mm_for_6.2_v2_Randomize-the-per-cpu-entry-areas.patch
+## lazy-RCU (low-utilization power improvement)
+#ApplyOptionalPatch 0000-PATCH-v9-01-13-rcu-Fix-missing-nocb-gp-wake-on-rcu_barrier.patch
+## Intel i915 drm next
+#ApplyOptionalPatch PULL-drm-intel-next.patch
+#ApplyOptionalPatch 0000-PATCH-v5-00-16-x86-make-PAT-and-MTRR-independent-from-each-other.patch
+## accelerated TLB
+#ApplyOptionalPatch PATCH-1-8-migrate_pages-organize-stats-with-struct-migrate_pages_stats.patch
+#ApplyOptionalPatch PATCH-2-8-migrate_pages-separate-hugetlb-folios-migration.patch
+#ApplyOptionalPatch PATCH-3-8-migrate_pages-restrict-number-of-pages-to-migrate-in-batch.patch
+#ApplyOptionalPatch PATCH-4-8-migrate_pages-split-unmap_and_move-to-_unmap-and-_move.patch
+#ApplyOptionalPatch PATCH-5-8-migrate_pages-batch-_unmap-and-_move.patch
+#ApplyOptionalPatch PATCH-6-8-migrate_pages-move-migrate_folio_done-and-migrate_folio_unmap.patch
+#ApplyOptionalPatch PATCH-7-8-migrate_pages-share-more-code-between-_unmap-and-_move.patch
+#ApplyOptionalPatch PATCH-8-8-migrate_pages-batch-flushing-TLB.patch
+# AMD s0i3 workaround
+#ApplyOptionalPatch 0001-platform-x86-amd-pmc-Add-a-workaround-for-s0i3-issue.patch
+
+ApplyOptionalPatch PATCH-V9-0-4-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
+
+# urgent (bugfixes)
+ApplyOptionalPatch 0001-perf-urgent-2023-01-06_Intel-RAPL-updates-for-new-model-IDs.patch
+ApplyOptionalPatch 0001-x86-bugs-Flush-IBP-in-ib_prctl_set.patch
+
+# important (performance, power management)
+ApplyOptionalPatch 0001-sched-core-2022-12-12-sched-Clear-ttwu_pending-after-enqueue_task.patch
+ApplyOptionalPatch 0001-x86_sgx_for_6.2-Introduce-SGX-feature-Asynchrounous-Exit-Notification.patch
+
+## LG-MRU further improvements
+ApplyOptionalPatch 0002-mm-add-vma_has_recency.patch
+
+# Intel EPB
+ApplyOptionalPatch 0001-x86-intel_epb-Set-Alder-Lake-N-and-Raptor-Lake-P-normal-EPB.patch
+
+## thermal next
+ApplyOptionalPatch 0001-thermal-6.2-rc1-Thermal-control-updates.patch
+ApplyOptionalPatch 0003-thermal-6.2-rc3-Thermal-control-fix.patch
+
+# BORE scheduler
+ApplyOptionalPatch 0001-linux6.0.y-bore1.7.5.patch
+
 # linux-fsync patches
-ApplyOptionalPatch tkg.patch
+#Patch200: tkg.patch
 ApplyOptionalPatch fsync.patch
 ApplyOptionalPatch OpenRGB.patch
+
+# enable older AMD GPUs to use new amdgpu driver
 ApplyOptionalPatch amdgpu-si-cik-default.patch
+
+# ACS override
 ApplyOptionalPatch acso.patch
 
-# Fix MG-LRU regression
-#Patch264: mm-support-posix_fadv_noreuse.patch-added-to-mm-unstable-branch.patch
-
-# device specific patches
-
 # temporary patches
-ApplyOptionalPatch 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
 ApplyOptionalPatch mt76_-mt7921_-Disable-powersave-features-by-default.patch
+ApplyOptionalPatch 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
+
+# remove AMD dummy wait
 ApplyOptionalPatch 0001-acpi-proc-idle-skip-dummy-wait.patch
-#ApplyOptionalPatch v8-0-4-PCI-vmd-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
 
 # gamescope HDR
 ApplyOptionalPatch 0001-HDR-testing.patch
+
+ApplyOptionalPatch 0001-HID-amd_sfh-Add-support-for-tablet-mode-switch-senso.patch
 
 ApplyOptionalPatch linux-kernel-test.patch
 
