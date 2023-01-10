@@ -127,13 +127,13 @@ Summary: The Linux kernel
 %define buildid .nobaratest
 %define specversion 6.1.4
 %define patchversion 6.1
-%define pkgrelease 201
+%define pkgrelease 202
 %define kversion 6
 %define tarfile_release 6.1.4
 # This is needed to do merge window version magic
 %define patchlevel 1
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 201%{?buildid}%{?dist}
+%define specrelease 202%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.1.4
 
@@ -916,7 +916,8 @@ Patch1: patch-%{patchversion}-redhat.patch
 # AMD s0i3 workaround
 #Patch701: 0001-platform-x86-amd-pmc-Add-a-workaround-for-s0i3-issue.patch
 
-Patch202: PATCH-V9-0-4-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
+# VMD PCIe update
+Patch53: 0000-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
 
 # urgent (bugfixes)
 Patch54: 0001-perf-urgent-2023-01-06_Intel-RAPL-updates-for-new-model-IDs.patch
@@ -956,7 +957,6 @@ Patch304: 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
 
 # remove AMD dummy wait
 Patch305: 0001-acpi-proc-idle-skip-dummy-wait.patch
-Patch306: PATCH-V9-0-4-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
 
 # gamescope HDR
 Patch307: 0001-HDR-testing.patch
@@ -1582,7 +1582,8 @@ ApplyOptionalPatch patch-%{patchversion}-redhat.patch
 # AMD s0i3 workaround
 #ApplyOptionalPatch 0001-platform-x86-amd-pmc-Add-a-workaround-for-s0i3-issue.patch
 
-ApplyOptionalPatch PATCH-V9-0-4-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
+# VMD PCIe update
+ApplyOptionalPatch 0000-Enable-PCIe-ASPM-and-LTR-on-select-hardware.patch
 
 # urgent (bugfixes)
 ApplyOptionalPatch 0001-perf-urgent-2023-01-06_Intel-RAPL-updates-for-new-model-IDs.patch
