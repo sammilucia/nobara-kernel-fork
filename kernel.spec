@@ -942,24 +942,24 @@ Patch300: 0001-linux6.0.y-bore1.7.5.patch
 
 # linux-fsync patches
 #Patch200: tkg.patch
-Patch302: fsync.patch
-Patch303: OpenRGB.patch
+Patch301: fsync.patch
+Patch302: OpenRGB.patch
 
 # enable older AMD GPUs to use new amdgpu driver
-Patch301: amdgpu-si-cik-default.patch
+Patch303: amdgpu-si-cik-default.patch
 
 # ACS override
-Patch302: acso.patch
+Patch304: acso.patch
 
 # temporary patches
-Patch303: mt76_-mt7921_-Disable-powersave-features-by-default.patch
-Patch304: 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
+Patch305: mt76_-mt7921_-Disable-powersave-features-by-default.patch
+Patch306: 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
 
 # remove AMD dummy wait
-Patch305: 0001-acpi-proc-idle-skip-dummy-wait.patch
+Patch307: 0001-acpi-proc-idle-skip-dummy-wait.patch
 
 # gamescope HDR
-Patch307: 0001-HDR-testing.patch
+Patch308: 0001-HDR-testing.patch
 
 Patch604: 0001-HID-amd_sfh-Add-support-for-tablet-mode-switch-senso.patch
 
