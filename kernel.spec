@@ -2,6 +2,7 @@
 # Per the below section about __spec_install_pre, any rpm
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
+%global _default_patch_fuzz 2
 
 # Disable LTO in userspace packages.
 %global _lto_cflags %{nil}
@@ -124,18 +125,18 @@ Summary: The Linux kernel
 #  to build the base kernel using the debug configuration. (Specifying
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
-%define buildid .fsynctest
-%define specversion 6.1.5
+%define buildid .fsync
+%define specversion 6.1.6
 %define patchversion 6.1
 %define pkgrelease 200
 %define kversion 6
-%define tarfile_release 6.1.5
+%define tarfile_release 6.1.6
 # This is needed to do merge window version magic
 %define patchlevel 1
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 200%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.1.5
+%define kabiversion 6.1.6
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -871,37 +872,44 @@ Source4002: gating.yaml
 Patch1: patch-%{patchversion}-redhat.patch
 %endif
 
-# new urgent 12-Jan
-Patch60: 0000-time-Fix-various-kernel-doc-problems.patch
+# ACPI pre-reqs from 8-Dec
+Patch40: 1-4-ACPICA-include-acpi-acpixf.h-Fix-indentation.patch
+Patch41: 2-4-ACPICA-Allow-address_space_handler-Install-and-_REG-execution-as-2-separate-steps.patch
+Patch42: 3-4-ACPI-EC-Fix-EC-address-space-handler-unregistration.patch
+Patch43: 4-4-ACPI-EC-fix-ECDT-probe-ordering-issues.patch
 
-# important (performance, power management)
-Patch201: 0001-sched-core-2022-12-12-sched-Clear-ttwu_pending-after-enqueue_task.patch
-Patch202: 0001-x86_sgx_for_6.2-Introduce-SGX-feature-Asynchrounous-Exit-Notification.patch
-Patch203: 0001-x86-intel_epb-Set-Alder-Lake-N-and-Raptor-Lake-P-normal-EPB.patch
-Patch204: 0001-thermal-6.2-rc1-Thermal-control-updates.patch
+# Alder-Lake fixes from 6.2
+Patch50: 0001-one-more-Intel-thermal-control-change.patch
 
-## MG-LRU further improvements
-Patch206: 0002-mm-add-vma_has_recency.patch
+# linux-fsync patches
+Patch200: tkg.patch
+Patch202: fsync.patch
+Patch203: OpenRGB.patch
+Patch206: amdgpu-si-cik-default.patch
+Patch207: acso.patch
 
-# BORE scheduler
-Patch300: 0001-linux6.0.y-bore1.7.6.patch
+# device specific patches
+Patch300: steam-deck.patch
+Patch301: linux-surface.patch
+#Patch302: asus-linux.patch
 
-# nobara patches
-#Patch301: tkg.patch
-Patch302: fsync.patch
-Patch303: OpenRGB.patch
-Patch304: amdgpu-si-cik-default.patch
-Patch305: acso.patch
+# VMD fixes for M16
+Patch500: apsm-1.patch
+Patch501: apsm-2.patch
+Patch502: apsm-3.patch
+Patch503: apsm-4.patch
 
-Patch400: 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
-Patch401: 0001-acpi-proc-idle-skip-dummy-wait.patch
-#Patch402: gamescope-hdr.patch
+# temporary patches
+Patch401: 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
+Patch405: mt76_-mt7921_-Disable-powersave-features-by-default.patch
+Patch408: 0001-acpi-proc-idle-skip-dummy-wait.patch
+Patch409: 0001-drm-i915-quirks-disable-async-flipping-on-specific-d.patch
+
+# gamescope HDR
+Patch410: gamescope-hdr.patch
 
 # Tablet mode stuff
 Patch505: 0001-HID-amd_sfh-Add-support-for-tablet-mode-switch-senso.patch
-
-# Mediatek - disable power management to fix bad performance
-Patch600: mt76_-mt7921_-Disable-powersave-features-by-default.patch
 
 # empty final patch to facilitate testing of kernel patches
 Patch999999: linux-kernel-test.patch
@@ -1430,7 +1438,7 @@ if [ "%{patches}" != "%%{patches}" ] ; then
 fi 2>/dev/null
 
 #patch_command='git --work-tree=. apply'
-patch_command='patch -p1 -F5 -s'
+patch_command='patch -p1 -F2 -s'
 ApplyPatch()
 {
   local patch=$1
@@ -1477,37 +1485,44 @@ cp -a %{SOURCE1} .
 ApplyOptionalPatch patch-%{patchversion}-redhat.patch
 %endif
 
-# new urgent 12-Jan
-ApplyOptionalPatch 0000-time-Fix-various-kernel-doc-problems.patch
+# ACPI pre-reqs from 8-Dec
+ApplyOptionalPatch 1-4-ACPICA-include-acpi-acpixf.h-Fix-indentation.patch
+ApplyOptionalPatch 2-4-ACPICA-Allow-address_space_handler-Install-and-_REG-execution-as-2-separate-steps.patch
+ApplyOptionalPatch 3-4-ACPI-EC-Fix-EC-address-space-handler-unregistration.patch
+ApplyOptionalPatch 4-4-ACPI-EC-fix-ECDT-probe-ordering-issues.patch
 
-# important (performance, power management)
-ApplyOptionalPatch 0001-sched-core-2022-12-12-sched-Clear-ttwu_pending-after-enqueue_task.patch
-ApplyOptionalPatch 0001-x86_sgx_for_6.2-Introduce-SGX-feature-Asynchrounous-Exit-Notification.patch
-ApplyOptionalPatch 0001-x86-intel_epb-Set-Alder-Lake-N-and-Raptor-Lake-P-normal-EPB.patch
-ApplyOptionalPatch 0001-thermal-6.2-rc1-Thermal-control-updates.patch
+# Alder-Lake fixes from 6.2
+ApplyOptionalPatch 0001-one-more-Intel-thermal-control-change.patch
 
-## MG-LRU further improvements
-ApplyOptionalPatch 0002-mm-add-vma_has_recency.patch
-
-# BORE scheduler
-ApplyOptionalPatch 0001-linux6.0.y-bore1.7.6.patch
-
-# nobara patches
-#ApplyOptionalPatch tkg.patch
+# linux-fsync patches
+ApplyOptionalPatch tkg.patch
 ApplyOptionalPatch fsync.patch
 ApplyOptionalPatch OpenRGB.patch
 ApplyOptionalPatch amdgpu-si-cik-default.patch
 ApplyOptionalPatch acso.patch
 
+# device specific patches
+ApplyOptionalPatch steam-deck.patch
+ApplyOptionalPatch linux-surface.patch
+#ApplyOptionalPatch asus-linux.patch
+
+# VMD fixes for M16
+ApplyOptionalPatch apsm-1.patch
+ApplyOptionalPatch apsm-2.patch
+ApplyOptionalPatch apsm-3.patch
+ApplyOptionalPatch apsm-4.patch
+
+# temporary patches
 ApplyOptionalPatch 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
+ApplyOptionalPatch mt76_-mt7921_-Disable-powersave-features-by-default.patch
 ApplyOptionalPatch 0001-acpi-proc-idle-skip-dummy-wait.patch
-#ApplyOptionalPatch gamescope-hdr.patch
+ApplyOptionalPatch 0001-drm-i915-quirks-disable-async-flipping-on-specific-d.patch
+
+# gamescope HDR
+ApplyOptionalPatch gamescope-hdr.patch
 
 # Tablet mode stuff
 ApplyOptionalPatch 0001-HID-amd_sfh-Add-support-for-tablet-mode-switch-senso.patch
-
-# Mediatek - disable power management to fix bad performance
-ApplyOptionalPatch mt76_-mt7921_-Disable-powersave-features-by-default.patch
 
 ApplyOptionalPatch linux-kernel-test.patch
 
@@ -3259,6 +3274,9 @@ fi
 #
 #
 %changelog
+* Sat Jan 14 2023 Justin M. Forbes <jforbes@fedoraproject.org> [6.1.6-0]
+- Linux v6.1.6
+
 * Thu Jan 12 2023 Justin M. Forbes <jforbes@fedoraproject.org> [6.1.5-0]
 - KVM: VMX: Execute IBPB on emulated VM-exit when guest has IBRS (Jim Mattson)
 - Update module filters for nvmem_u-boot-env (Justin M. Forbes)

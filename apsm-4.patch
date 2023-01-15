@@ -1,0 +1,138 @@
+---
+ V8
+  - Removed struct vmd_device_data patch. Instead use #define for the LTR
+    value which is the same across all products needing the quirk.
+ V7
+  - No change
+ V6
+  - Set ASPM first before setting LTR. This is needed because some
+    devices may only have LTR set by BIOS and not ASPM
+  - Skip setting the LTR if the current LTR in non-zero.
+ V5
+  - Provide the LTR value as driver data.
+  - Use DWORD for the config space write to avoid PCI WORD access bug.
+  - Set ASPM links firsts, enabling all link states, before setting a
+    default LTR if the capability is present
+  - Add kernel message that VMD is setting the device LTR.
+ V4
+  - Refactor vmd_enable_apsm() to exit early, making the lines shorter
+    and more readable. Suggested by Christoph.
+ V3
+  - No changes
+ V2
+  - Use return status to print pci_info message if ASPM cannot be enabled.
+  - Add missing static declaration, caught by lkp@intel.com
+ drivers/pci/controller/vmd.c | 64 ++++++++++++++++++++++++++++++++----
+ 1 file changed, 58 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/pci/controller/vmd.c b/drivers/pci/controller/vmd.c
+index 86f3085db014..cba57e3091f6 100644
+--- a/drivers/pci/controller/vmd.c
++++ b/drivers/pci/controller/vmd.c
+@@ -66,12 +66,22 @@ enum vmd_features {
+ 	 * interrupt handling.
+ 	 */
+ 	VMD_FEAT_CAN_BYPASS_MSI_REMAP		= (1 << 4),
++
++	/*
++	 * Enable ASPM on the PCIE root ports and set the default LTR of the
++	 * storage devices on platforms where these values are not configured by
++	 * BIOS. This is needed for laptops, which require these settings for
++	 * proper power management of the SoC.
++	 */
++	VMD_FEAT_BIOS_PM_QUIRK		= (1 << 5),
+ };
+ 
+ #define VMD_FEATS_CLIENT	(VMD_FEAT_HAS_MEMBAR_SHADOW_VSCAP |	\
+ 				 VMD_FEAT_HAS_BUS_RESTRICTIONS |	\
+ 				 VMD_FEAT_OFFSET_FIRST_VECTOR)
+ 
++#define VMD_BIOS_PM_QUIRK_LTR	0x1003	/* 3145728 ns */
++
+ static DEFINE_IDA(vmd_instance_ida);
+ 
+ /*
+@@ -713,6 +723,46 @@ static void vmd_copy_host_bridge_flags(struct pci_host_bridge *root_bridge,
+ 	vmd_bridge->native_dpc = root_bridge->native_dpc;
+ }
+ 
++/*
++ * Enable ASPM and LTR settings on devices that aren't configured by BIOS.
++ */
++static int vmd_pm_enable_quirk(struct pci_dev *pdev, void *userdata)
++{
++	unsigned long features = *(unsigned long *)userdata;
++	u16 ltr = VMD_BIOS_PM_QUIRK_LTR;
++	u32 ltr_reg;
++	int pos;
++
++	if (!(features & VMD_FEAT_BIOS_PM_QUIRK))
++		return 0;
++
++	pci_enable_link_state(pdev, PCIE_LINK_STATE_ALL);
++
++	pos = pci_find_ext_capability(pdev, PCI_EXT_CAP_ID_LTR);
++	if (!pos)
++		return 0;
++
++	/*
++	 * Skip if the max snoop LTR is non-zero, indicating BIOS has set it
++	 * so the LTR quirk is not needed.
++	 */
++	pci_read_config_dword(pdev, pos + PCI_LTR_MAX_SNOOP_LAT, &ltr_reg);
++	if (!!(ltr_reg & (PCI_LTR_VALUE_MASK | PCI_LTR_SCALE_MASK)))
++		return 0;
++
++	/*
++	 * Set the default values to the maximum required by the platform to
++	 * allow the deepest power management savings. Write as a DWORD where
++	 * the lower word is the max snoop latency and the upper word is the
++	 * max non-snoop latency.
++	 */
++	ltr_reg = (ltr << 16) | ltr;
++	pci_write_config_dword(pdev, pos + PCI_LTR_MAX_SNOOP_LAT, ltr_reg);
++	pci_info(pdev, "VMD: Default LTR value set by driver\n");
++
++	return 0;
++}
++
+ static int vmd_enable_domain(struct vmd_dev *vmd, unsigned long features)
+ {
+ 	struct pci_sysdata *sd = &vmd->sysdata;
+@@ -867,6 +917,8 @@ static int vmd_enable_domain(struct vmd_dev *vmd, unsigned long features)
+ 		pci_reset_bus(child->self);
+ 	pci_assign_unassigned_bus_resources(vmd->bus);
+ 
++	pci_walk_bus(vmd->bus, vmd_pm_enable_quirk, &features);
++
+ 	/*
+ 	 * VMD root buses are virtual and don't return true on pci_is_pcie()
+ 	 * and will fail pcie_bus_configure_settings() early. It can instead be
+@@ -1005,17 +1057,17 @@ static const struct pci_device_id vmd_ids[] = {
+ 				VMD_FEAT_HAS_BUS_RESTRICTIONS |
+ 				VMD_FEAT_CAN_BYPASS_MSI_REMAP,},
+ 	{PCI_VDEVICE(INTEL, 0x467f),
+-		.driver_data = VMD_FEATS_CLIENT,},
++		.driver_data = VMD_FEATS_CLIENT | VMD_FEAT_BIOS_PM_QUIRK,},
+ 	{PCI_VDEVICE(INTEL, 0x4c3d),
+-		.driver_data = VMD_FEATS_CLIENT,},
++		.driver_data = VMD_FEATS_CLIENT | VMD_FEAT_BIOS_PM_QUIRK,},
+ 	{PCI_VDEVICE(INTEL, 0xa77f),
+-		.driver_data = VMD_FEATS_CLIENT,},
++		.driver_data = VMD_FEATS_CLIENT | VMD_FEAT_BIOS_PM_QUIRK,},
+ 	{PCI_VDEVICE(INTEL, 0x7d0b),
+-		.driver_data = VMD_FEATS_CLIENT,},
++		.driver_data = VMD_FEATS_CLIENT | VMD_FEAT_BIOS_PM_QUIRK,},
+ 	{PCI_VDEVICE(INTEL, 0xad0b),
+-		.driver_data = VMD_FEATS_CLIENT,},
++		.driver_data = VMD_FEATS_CLIENT | VMD_FEAT_BIOS_PM_QUIRK,},
+ 	{PCI_VDEVICE(INTEL, PCI_DEVICE_ID_INTEL_VMD_9A0B),
+-		.driver_data = VMD_FEATS_CLIENT,},
++		.driver_data = VMD_FEATS_CLIENT | VMD_FEAT_BIOS_PM_QUIRK,},
+ 	{0,}
+ };
+ MODULE_DEVICE_TABLE(pci, vmd_ids);
+-- 
+2.25.1
+
+  
