@@ -94,7 +94,6 @@ Summary: The Linux kernel
 
 %if %{zipmodules}
 %global zipsed -e 's/\.ko$/\.ko.xz/'
-# for parallel xz processes, replace with 1 to go back to single process
 %endif
 
 %if 0%{?fedora}
@@ -125,7 +124,7 @@ Summary: The Linux kernel
 #  to build the base kernel using the debug configuration. (Specifying
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
-# define buildid .fsync
+%define buildid .fsync
 %define specversion 6.1.7
 %define patchversion 6.1
 %define pkgrelease 200
@@ -576,6 +575,7 @@ Requires: kernel-modules-uname-r = %{KVERREL}
 %endif
 Requires: apparmor-utils
 Requires: apparmor-parser
+Requires: custom-device-pollrates
 
 
 #
@@ -766,7 +766,6 @@ Source13: redhatsecureboot003.cer
 
 Source20: mod-denylist.sh
 Source21: mod-sign.sh
-Source22: parallel_xz.sh
 
 %define modsign_cmd %{SOURCE21}
 
@@ -872,13 +871,13 @@ Source4002: gating.yaml
 Patch1: patch-%{patchversion}-redhat.patch
 %endif
 
-# ACPI pre-reqs from 8-Dec
+# asus-linux: ACPI pre-reqs from 8-Dec
 Patch40: 1-4-ACPICA-include-acpi-acpixf.h-Fix-indentation.patch
 Patch41: 2-4-ACPICA-Allow-address_space_handler-Install-and-_REG-execution-as-2-separate-steps.patch
 Patch42: 3-4-ACPI-EC-Fix-EC-address-space-handler-unregistration.patch
 Patch43: 4-4-ACPI-EC-fix-ECDT-probe-ordering-issues.patch
 
-# Alder-Lake fixes from 6.2
+# asus-linux: Alder-Lake fixes from 6.2
 Patch50: 0001-one-more-Intel-thermal-control-change.patch
 
 # linux-fsync patches
@@ -891,9 +890,8 @@ Patch207: acso.patch
 # device specific patches
 Patch300: steam-deck.patch
 Patch301: linux-surface.patch
-#Patch302: asus-linux.patch
 
-# VMD fixes for M16
+# asus-linux: VMD fixes for M16
 Patch500: apsm-1.patch
 Patch501: apsm-2.patch
 Patch502: apsm-3.patch
@@ -901,6 +899,8 @@ Patch503: apsm-4.patch
 
 # temporary patches
 Patch401: 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
+# https://github.com/archlinux/linux/commit/7c4fed4d2afd27d7acb8835f8e79f49c99c03cdf
+Patch407: 0001-Revert-drm-display-dp_mst-move-all-payload-info-into-the-atomic-state.patch
 Patch405: mt76_-mt7921_-Disable-powersave-features-by-default.patch
 Patch408: 0001-acpi-proc-idle-skip-dummy-wait.patch
 Patch409: 0001-drm-i915-quirks-disable-async-flipping-on-specific-d.patch
@@ -908,8 +908,18 @@ Patch409: 0001-drm-i915-quirks-disable-async-flipping-on-specific-d.patch
 # gamescope HDR
 Patch410: gamescope-hdr.patch
 
-# Tablet mode stuff
+# asus-linux: Tablet mode stuff
 Patch505: 0001-HID-amd_sfh-Add-support-for-tablet-mode-switch-senso.patch
+
+# Allow to set custom USB pollrate for specific devices like so: 
+# usbcore.interrupt_interval_override=045e:00db:16,1bcf:0005:1
+# useful for setting polling rate of wired PS4/PS5 controller to 1000Hz
+# https://github.com/KarsMulder/Linux-Pollrate-Patch
+# https://gitlab.com/GloriousEggroll/nobara-images/-/issues/64
+Patch506: 0001-Allow-to-set-custom-USB-pollrate-for-specific-device.patch
+
+# Also set the PS controller bluetooth polling rate to 1000Hz
+Patch507: set-ps4-bt-poll-rate-1000hz.patch
 
 # empty final patch to facilitate testing of kernel patches
 Patch999999: linux-kernel-test.patch
@@ -1485,7 +1495,7 @@ cp -a %{SOURCE1} .
 ApplyOptionalPatch patch-%{patchversion}-redhat.patch
 %endif
 
-# ACPI pre-reqs from 8-Dec
+# asus-linux: ACPI pre-reqs from 8-Dec
 ApplyOptionalPatch 1-4-ACPICA-include-acpi-acpixf.h-Fix-indentation.patch
 ApplyOptionalPatch 2-4-ACPICA-Allow-address_space_handler-Install-and-_REG-execution-as-2-separate-steps.patch
 ApplyOptionalPatch 3-4-ACPI-EC-Fix-EC-address-space-handler-unregistration.patch
@@ -1504,9 +1514,8 @@ ApplyOptionalPatch acso.patch
 # device specific patches
 ApplyOptionalPatch steam-deck.patch
 ApplyOptionalPatch linux-surface.patch
-#ApplyOptionalPatch asus-linux.patch
 
-# VMD fixes for M16
+# asus-linux: VMD fixes for M16
 ApplyOptionalPatch apsm-1.patch
 ApplyOptionalPatch apsm-2.patch
 ApplyOptionalPatch apsm-3.patch
@@ -1515,14 +1524,25 @@ ApplyOptionalPatch apsm-4.patch
 # temporary patches
 ApplyOptionalPatch 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
 ApplyOptionalPatch mt76_-mt7921_-Disable-powersave-features-by-default.patch
+ApplyOptionalPatch 0001-Revert-drm-display-dp_mst-move-all-payload-info-into-the-atomic-state.patch
 ApplyOptionalPatch 0001-acpi-proc-idle-skip-dummy-wait.patch
 ApplyOptionalPatch 0001-drm-i915-quirks-disable-async-flipping-on-specific-d.patch
 
 # gamescope HDR
 ApplyOptionalPatch gamescope-hdr.patch
 
-# Tablet mode stuff
+# asus-linux: Tablet mode stuff
 ApplyOptionalPatch 0001-HID-amd_sfh-Add-support-for-tablet-mode-switch-senso.patch
+
+# Allow to set custom USB pollrate for specific devices like so: 
+# usbcore.interrupt_interval_override=045e:00db:16,1bcf:0005:1
+# useful for setting polling rate of wired PS4/PS5 controller to 1000Hz
+# https://github.com/KarsMulder/Linux-Pollrate-Patch
+# https://gitlab.com/GloriousEggroll/nobara-images/-/issues/64
+ApplyOptionalPatch 0001-Allow-to-set-custom-USB-pollrate-for-specific-device.patch
+
+# Also set the PScontroller bluetooth polling rate to 1000Hz
+ApplyOptionalPatch set-ps4-bt-poll-rate-1000hz.patch
 
 ApplyOptionalPatch linux-kernel-test.patch
 

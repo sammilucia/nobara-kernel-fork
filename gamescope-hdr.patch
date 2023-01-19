@@ -1419,10 +1419,10 @@ Signed-off-by: Joshua Ashton <joshua@froggi.es>
  1 file changed, 17 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/gpu/drm/amd/display/dc/core/dc_resource.c b/drivers/gpu/drm/amd/display/dc/core/dc_resource.c
-index 06b5f49e0954..151981217c5f 100644
+index fd8db482e..81dbf546d 100644
 --- a/drivers/gpu/drm/amd/display/dc/core/dc_resource.c
 +++ b/drivers/gpu/drm/amd/display/dc/core/dc_resource.c
-@@ -3010,23 +3010,29 @@ static void set_avi_info_frame(
+@@ -2770,23 +2770,29 @@ static void set_avi_info_frame(
  	hdmi_info.bits.S0_S1 = scan_type;
  
  	/* C0, C1 : Colorimetry */
@@ -1462,7 +1462,7 @@ index 06b5f49e0954..151981217c5f 100644
 +		break;
  	}
  
- 	if (pixel_encoding && color_space == COLOR_SPACE_2020_YCBCR &&
+ 	/* TODO: un-hardcode aspect ratio */
 -- 
 2.39.0
 
@@ -1478,10 +1478,10 @@ Signed-off-by: Joshua Ashton <joshua@froggi.es>
  1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/gpu/drm/amd/display/dc/core/dc_resource.c b/drivers/gpu/drm/amd/display/dc/core/dc_resource.c
-index 151981217c5f..f022465572e8 100644
+index 81dbf546d..d7d570844 100644
 --- a/drivers/gpu/drm/amd/display/dc/core/dc_resource.c
 +++ b/drivers/gpu/drm/amd/display/dc/core/dc_resource.c
-@@ -3021,10 +3021,13 @@ static void set_avi_info_frame(
+@@ -2781,10 +2781,13 @@ static void set_avi_info_frame(
  		break;
  	case COLOR_SPACE_2020_RGB_FULLRANGE:
  	case COLOR_SPACE_2020_RGB_LIMITEDRANGE:
@@ -1566,4 +1566,229 @@ index 471078fc3900..652270a0b498 100644
  				0x0000, 0x0200, 0x0000, 0x0000, 0x0000, 0x1000} },
 -- 
 2.39.0
+From dc91bc9addbe058894a78ae72a13b20d76636b0c Mon Sep 17 00:00:00 2001
+From: Joshua Ashton <joshua@froggi.es>
+Date: Mon, 16 Jan 2023 04:20:17 +0000
+Subject: [PATCH] drm/amd/display: Hook up content_type property
+
+Signed-off-by: Joshua Ashton <joshua@froggi.es>
+---
+ .../gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c | 21 ++++++
+ .../gpu/drm/amd/display/dc/core/dc_resource.c | 69 ++++++-------------
+ drivers/gpu/drm/amd/display/dc/dc_stream.h    |  1 +
+ 3 files changed, 43 insertions(+), 48 deletions(-)
+
+diff --git a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
+index eb440b1bf1ac2..4377f835bfb6a 100644
+--- a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
++++ b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
+@@ -5220,6 +5220,24 @@ get_output_color_space(const struct dc_crtc_timing *dc_crtc_timing,
+ 	return color_space;
+ }
+ 
++static enum display_content_type
++get_output_content_type(const struct drm_connector_state *connector_state)
++{
++	switch (connector_state->content_type) {
++	default:
++	case DRM_MODE_CONTENT_TYPE_NO_DATA:
++		return DISPLAY_CONTENT_TYPE_NO_DATA;
++	case DRM_MODE_CONTENT_TYPE_GRAPHICS:
++		return DISPLAY_CONTENT_TYPE_GRAPHICS;
++	case DRM_MODE_CONTENT_TYPE_PHOTO:
++		return DISPLAY_CONTENT_TYPE_PHOTO;
++	case DRM_MODE_CONTENT_TYPE_CINEMA:
++		return DISPLAY_CONTENT_TYPE_CINEMA;
++	case DRM_MODE_CONTENT_TYPE_GAME:
++		return DISPLAY_CONTENT_TYPE_GAME;
++	}
++}
++
+ static bool adjust_colour_depth_from_display_info(
+ 	struct dc_crtc_timing *timing_out,
+ 	const struct drm_display_info *info)
+@@ -5354,6 +5372,7 @@ static void fill_stream_properties_from_drm_display_mode(
+ 	}
+ 
+ 	stream->output_color_space = get_output_color_space(timing_out, connector_state);
++	stream->content_type = get_output_content_type(connector_state);
+ }
+ 
+ static void fill_audio_info(struct audio_info *audio_info,
+@@ -7143,6 +7162,8 @@ void amdgpu_dm_connector_init_helper(struct amdgpu_display_manager *dm,
+ 				adev->mode_info.abm_level_property, 0);
+ 	}
+ 
++	drm_connector_attach_content_type_property(&aconnector->base);
++
+ 	if (connector_type == DRM_MODE_CONNECTOR_HDMIA) {
+ 		if (!drm_mode_create_hdmi_colorspace_property(&aconnector->base, supported_colorspaces))
+ 			drm_connector_attach_colorspace_property(&aconnector->base);
+diff --git a/drivers/gpu/drm/amd/display/dc/core/dc_resource.c b/drivers/gpu/drm/amd/display/dc/core/dc_resource.c
+index f022465572e82..7a88301cc38f1 100644
+--- a/drivers/gpu/drm/amd/display/dc/core/dc_resource.c
++++ b/drivers/gpu/drm/amd/display/dc/core/dc_resource.c
+@@ -2943,14 +2943,9 @@ static void set_avi_info_frame(
+ 	uint32_t pixel_encoding = 0;
+ 	enum scanning_type scan_type = SCANNING_TYPE_NODATA;
+ 	enum dc_aspect_ratio aspect = ASPECT_RATIO_NO_DATA;
+-	bool itc = false;
+-	uint8_t itc_value = 0;
+-	uint8_t cn0_cn1 = 0;
+-	unsigned int cn0_cn1_value = 0;
+ 	uint8_t *check_sum = NULL;
+ 	uint8_t byte_index = 0;
+ 	union hdmi_info_packet hdmi_info;
+-	union display_content_support support = {0};
+ 	unsigned int vic = pipe_ctx->stream->timing.vic;
+ 	unsigned int rid = pipe_ctx->stream->timing.rid;
+ 	unsigned int fr_ind = pipe_ctx->stream->timing.fr_index;
+@@ -3063,49 +3058,27 @@ static void set_avi_info_frame(
+ 	/* Active Format Aspect ratio - same as Picture Aspect Ratio. */
+ 	hdmi_info.bits.R0_R3 = ACTIVE_FORMAT_ASPECT_RATIO_SAME_AS_PICTURE;
+ 
+-	/* TODO: un-hardcode cn0_cn1 and itc */
+-
+-	cn0_cn1 = 0;
+-	cn0_cn1_value = 0;
+-
+-	itc = true;
+-	itc_value = 1;
+-
+-	support = stream->content_support;
+-
+-	if (itc) {
+-		if (!support.bits.valid_content_type) {
+-			cn0_cn1_value = 0;
+-		} else {
+-			if (cn0_cn1 == DISPLAY_CONTENT_TYPE_GRAPHICS) {
+-				if (support.bits.graphics_content == 1) {
+-					cn0_cn1_value = 0;
+-				}
+-			} else if (cn0_cn1 == DISPLAY_CONTENT_TYPE_PHOTO) {
+-				if (support.bits.photo_content == 1) {
+-					cn0_cn1_value = 1;
+-				} else {
+-					cn0_cn1_value = 0;
+-					itc_value = 0;
+-				}
+-			} else if (cn0_cn1 == DISPLAY_CONTENT_TYPE_CINEMA) {
+-				if (support.bits.cinema_content == 1) {
+-					cn0_cn1_value = 2;
+-				} else {
+-					cn0_cn1_value = 0;
+-					itc_value = 0;
+-				}
+-			} else if (cn0_cn1 == DISPLAY_CONTENT_TYPE_GAME) {
+-				if (support.bits.game_content == 1) {
+-					cn0_cn1_value = 3;
+-				} else {
+-					cn0_cn1_value = 0;
+-					itc_value = 0;
+-				}
+-			}
+-		}
+-		hdmi_info.bits.CN0_CN1 = cn0_cn1_value;
+-		hdmi_info.bits.ITC = itc_value;
++	switch (stream->content_type) {
++	case DISPLAY_CONTENT_TYPE_NO_DATA:
++		hdmi_info.bits.CN0_CN1 = 0;
++		hdmi_info.bits.ITC = 0;
++		break;
++	case DISPLAY_CONTENT_TYPE_GRAPHICS:
++		hdmi_info.bits.CN0_CN1 = 0;
++		hdmi_info.bits.ITC = 1;
++		break;
++	case DISPLAY_CONTENT_TYPE_PHOTO:
++		hdmi_info.bits.CN0_CN1 = 1;
++		hdmi_info.bits.ITC = 1;
++		break;
++	case DISPLAY_CONTENT_TYPE_CINEMA:
++		hdmi_info.bits.CN0_CN1 = 2;
++		hdmi_info.bits.ITC = 1;
++		break;
++	case DISPLAY_CONTENT_TYPE_GAME:
++		hdmi_info.bits.CN0_CN1 = 3;
++		hdmi_info.bits.ITC = 1;
++		break;
+ 	}
+ 
+ 	if (stream->qs_bit == 1) {
+diff --git a/drivers/gpu/drm/amd/display/dc/dc_stream.h b/drivers/gpu/drm/amd/display/dc/dc_stream.h
+index ef33d7d8a2bf7..51dc30706e430 100644
+--- a/drivers/gpu/drm/amd/display/dc/dc_stream.h
++++ b/drivers/gpu/drm/amd/display/dc/dc_stream.h
+@@ -205,6 +205,7 @@ struct dc_stream_state {
+ 	struct dc_csc_transform csc_color_matrix;
+ 
+ 	enum dc_color_space output_color_space;
++	enum display_content_type content_type;
+ 	enum dc_dither_option dither_option;
+ 
+ 	enum view_3d_format view_format;
+-- 
+GitLab
+
+From a3b57c86fae88c74c9ff8b48d44b8d7a1e3824cb Mon Sep 17 00:00:00 2001
+From: Joshua Ashton <joshua@froggi.es>
+Date: Tue, 17 Jan 2023 06:03:02 +0000
+Subject: [PATCH] drm/amd/display: Remove unused display_content_support
+
+This was never filled in and thus never truly used.
+
+Checking the EDID for content_type support is not required for sending the avi infoframe packet.
+
+Signed-off-by: Joshua Ashton <joshua@froggi.es>
+---
+ drivers/gpu/drm/amd/display/dc/dc_stream.h |  1 -
+ drivers/gpu/drm/amd/display/dc/dc_types.h  | 14 --------------
+ 2 files changed, 15 deletions(-)
+
+diff --git a/drivers/gpu/drm/amd/display/dc/dc_stream.h b/drivers/gpu/drm/amd/display/dc/dc_stream.h
+index 51dc30706e430..a499c0952ea0d 100644
+--- a/drivers/gpu/drm/amd/display/dc/dc_stream.h
++++ b/drivers/gpu/drm/amd/display/dc/dc_stream.h
+@@ -182,7 +182,6 @@ struct dc_stream_state {
+ 	 */
+ 	struct link_encoder *link_enc;
+ 	struct dc_panel_patch sink_patches;
+-	union display_content_support content_support;
+ 	struct dc_crtc_timing timing;
+ 	struct dc_crtc_timing_adjust adjust;
+ 	struct dc_info_packet vrr_infopacket;
+diff --git a/drivers/gpu/drm/amd/display/dc/dc_types.h b/drivers/gpu/drm/amd/display/dc/dc_types.h
+index dc78e2404b487..fdf58a2e3a751 100644
+--- a/drivers/gpu/drm/amd/display/dc/dc_types.h
++++ b/drivers/gpu/drm/amd/display/dc/dc_types.h
+@@ -174,18 +174,6 @@ struct dc_edid {
+ 
+ #define AUDIO_INFO_DISPLAY_NAME_SIZE_IN_CHARS 20
+ 
+-union display_content_support {
+-	unsigned int raw;
+-	struct {
+-		unsigned int valid_content_type :1;
+-		unsigned int game_content :1;
+-		unsigned int cinema_content :1;
+-		unsigned int photo_content :1;
+-		unsigned int graphics_content :1;
+-		unsigned int reserved :27;
+-	} bits;
+-};
+-
+ struct dc_panel_patch {
+ 	unsigned int dppowerup_delay;
+ 	unsigned int extra_t12_ms;
+@@ -218,8 +206,6 @@ struct dc_edid_caps {
+ 	uint32_t audio_latency;
+ 	uint32_t video_latency;
+ 
+-	union display_content_support content_support;
+-
+ 	uint8_t qs_bit;
+ 	uint8_t qy_bit;
+ 
+-- 
+GitLab
+
 
