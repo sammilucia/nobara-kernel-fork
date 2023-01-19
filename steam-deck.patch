@@ -1,8 +1,20 @@
+From 6ea02463d708d685c20f0f8fa9cc819bc6139ab5 Mon Sep 17 00:00:00 2001
+From: GloriousEggroll <gloriouseggroll@gmail.com>
+Date: Mon, 9 Jan 2023 18:07:59 -0700
+Subject: [PATCH] steam-deck
+
+---
+ drivers/platform/x86/Kconfig     |  14 +
+ drivers/platform/x86/Makefile    |   3 +
+ drivers/platform/x86/steamdeck.c | 523 +++++++++++++++++++++++++++++++
+ 3 files changed, 540 insertions(+)
+ create mode 100644 drivers/platform/x86/steamdeck.c
+
 diff --git a/drivers/platform/x86/Kconfig b/drivers/platform/x86/Kconfig
-index 53abd553b842..5c42b99fe26d 100644
+index 5692385e2..badc4f642 100644
 --- a/drivers/platform/x86/Kconfig
 +++ b/drivers/platform/x86/Kconfig
-@@ -1162,6 +1162,20 @@
+@@ -1099,6 +1099,20 @@ config WINMATE_FM07_KEYS
  	  buttons below the display. This module adds an input device
  	  that delivers key events when these buttons are pressed.
  
@@ -22,12 +34,12 @@ index 53abd553b842..5c42b99fe26d 100644
 +
  endif # X86_PLATFORM_DEVICES
  
- config PMC_ATOM
+ config P2SB
 diff --git a/drivers/platform/x86/Makefile b/drivers/platform/x86/Makefile
-index c12a9b044fd8..c3cc86b27350 100644
+index 1d3d1b025..75b30a3fa 100644
 --- a/drivers/platform/x86/Makefile
 +++ b/drivers/platform/x86/Makefile
-@@ -133,3 +133,6 @@
+@@ -134,3 +134,6 @@ obj-$(CONFIG_SIEMENS_SIMATIC_IPC)	+= simatic-ipc.o
  
  # Winmate
  obj-$(CONFIG_WINMATE_FM07_KEYS)		+= winmate-fm07-keys.o
@@ -36,7 +48,7 @@ index c12a9b044fd8..c3cc86b27350 100644
 +obj-$(CONFIG_STEAMDECK)			+= steamdeck.o
 diff --git a/drivers/platform/x86/steamdeck.c b/drivers/platform/x86/steamdeck.c
 new file mode 100644
-index 000000000000..77a6677ec19e
+index 000000000..77a6677ec
 --- /dev/null
 +++ b/drivers/platform/x86/steamdeck.c
 @@ -0,0 +1,523 @@
@@ -563,3 +575,6 @@ index 000000000000..77a6677ec19e
 +MODULE_AUTHOR("Andrey Smirnov <andrew.smirnov@gmail.com>");
 +MODULE_DESCRIPTION("Steam Deck ACPI platform driver");
 +MODULE_LICENSE("GPL");
+-- 
+2.39.0
+

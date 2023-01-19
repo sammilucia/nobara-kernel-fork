@@ -1,10 +1,6 @@
-From d0e733cd14c5939ec9f21e2c5093b5a2eb56cabb Mon Sep 17 00:00:00 2001
-From: Adrian Freund <adrian@freund.io>
-Date: Thu, 8 Dec 2022 10:22:09 +0100
-Subject: [PATCH] HID: amd_sfh: Add support for tablet-mode-switch sensor
-
 This patch adds support for the tablet mode switch sensors on
-convertible devices where that sensor is managed by AMD SFH.
+convertible devices where that sensor is managed by AMD SFH, like the
+Asus Flow X13 and the Lenovo ThinkPad L13 Yoga Gen2 (AMD).
 
 Co-developed-by: Ivan Dovgal <iv.dovg@gmail.com>
 Signed-off-by: Ivan Dovgal <iv.dovg@gmail.com>
@@ -12,14 +8,17 @@ Co-developed-by: Luke D. Jones <luke@ljones.dev>
 Signed-off-by: Luke D. Jones <luke@ljones.dev>
 Signed-off-by: Adrian Freund <adrian@freund.io>
 ---
+v2:
+* Fixed build warning reported by kernel test robot <lkp@intel.com>
+
  drivers/hid/amd-sfh-hid/amd_sfh_client.c      |  2 ++
  drivers/hid/amd-sfh-hid/amd_sfh_hid.h         |  2 +-
  drivers/hid/amd-sfh-hid/amd_sfh_pcie.c        |  4 +++
  drivers/hid/amd-sfh-hid/amd_sfh_pcie.h        |  1 +
  .../hid_descriptor/amd_sfh_hid_desc.c         | 27 +++++++++++++++++++
  .../hid_descriptor/amd_sfh_hid_desc.h         |  7 +++++
- .../hid_descriptor/amd_sfh_hid_report_desc.h  | 20 ++++++++++++++
- 7 files changed, 62 insertions(+), 1 deletion(-)
+ .../hid_descriptor/amd_sfh_hid_report_desc.h  | 21 +++++++++++++++
+ 7 files changed, 63 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/hid/amd-sfh-hid/amd_sfh_client.c b/drivers/hid/amd-sfh-hid/amd_sfh_client.c
 index 8275bba63611..83dd0402933c 100644
@@ -171,15 +170,16 @@ index ebd55675eb62..b22068a47429 100644
 +} __packed;
  #endif
 diff --git a/drivers/hid/amd-sfh-hid/hid_descriptor/amd_sfh_hid_report_desc.h b/drivers/hid/amd-sfh-hid/hid_descriptor/amd_sfh_hid_report_desc.h
-index 697f2791ea9c..a05e65d4db4c 100644
+index 697f2791ea9c..96cbc1e5b9a7 100644
 --- a/drivers/hid/amd-sfh-hid/hid_descriptor/amd_sfh_hid_report_desc.h
 +++ b/drivers/hid/amd-sfh-hid/hid_descriptor/amd_sfh_hid_report_desc.h
-@@ -644,6 +644,26 @@ static const u8 als_report_descriptor[] = {
+@@ -644,6 +644,27 @@ static const u8 als_report_descriptor[] = {
  0xC0			/* HID end collection */
  };
  
 +
 +/* TABLET MODE SWITCH */
++__maybe_unused // Used by sfh1.0, but not yet implemented in sfh1.1
 +static const u8 tms_report_descriptor[] = {
 +0x06, 0x43, 0xFF,  // Usage Page (Vendor Defined 0xFF43)
 +0x0A, 0x02, 0x02,  // Usage (0x0202)
