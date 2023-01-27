@@ -125,17 +125,17 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 %define buildid .fsync
-%define specversion 6.1.7
+%define specversion 6.1.8
 %define patchversion 6.1
 %define pkgrelease 200
 %define kversion 6
-%define tarfile_release 6.1.7
+%define tarfile_release 6.1.8
 # This is needed to do merge window version magic
 %define patchlevel 1
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 200%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.1.7
+%define kabiversion 6.1.8
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -889,7 +889,7 @@ Patch207: acso.patch
 
 # device specific patches
 Patch300: steam-deck.patch
-Patch301: linux-surface.patch
+#Patch301: linux-surface.patch
 
 # asus-linux: VMD fixes for M16
 Patch500: apsm-1.patch
@@ -900,13 +900,13 @@ Patch503: apsm-4.patch
 # temporary patches
 Patch401: 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
 # https://github.com/archlinux/linux/commit/7c4fed4d2afd27d7acb8835f8e79f49c99c03cdf
-Patch407: 0001-Revert-drm-display-dp_mst-move-all-payload-info-into-the-atomic-state.patch
 Patch405: mt76_-mt7921_-Disable-powersave-features-by-default.patch
+Patch407: 0001-Revert-drm-display-dp_mst-move-all-payload-info-into-the-atomic-state.patch
 Patch408: 0001-acpi-proc-idle-skip-dummy-wait.patch
 Patch409: 0001-drm-i915-quirks-disable-async-flipping-on-specific-d.patch
 
 # gamescope HDR
-Patch410: gamescope-hdr.patch
+#Patch410: gamescope-hdr.patch
 
 # asus-linux: Tablet mode stuff
 Patch505: 0001-HID-amd_sfh-Add-support-for-tablet-mode-switch-senso.patch
@@ -1513,7 +1513,7 @@ ApplyOptionalPatch acso.patch
 
 # device specific patches
 ApplyOptionalPatch steam-deck.patch
-ApplyOptionalPatch linux-surface.patch
+#ApplyOptionalPatch linux-surface.patch
 
 # asus-linux: VMD fixes for M16
 ApplyOptionalPatch apsm-1.patch
@@ -1529,7 +1529,7 @@ ApplyOptionalPatch 0001-acpi-proc-idle-skip-dummy-wait.patch
 ApplyOptionalPatch 0001-drm-i915-quirks-disable-async-flipping-on-specific-d.patch
 
 # gamescope HDR
-ApplyOptionalPatch gamescope-hdr.patch
+#ApplyOptionalPatch gamescope-hdr.patch
 
 # asus-linux: Tablet mode stuff
 ApplyOptionalPatch 0001-HID-amd_sfh-Add-support-for-tablet-mode-switch-senso.patch
@@ -3294,6 +3294,9 @@ fi
 #
 #
 %changelog
+* Tue Jan 24 2023 Augusto Caringi <acaringi@redhat.com> [6.1.8-0]
+- Linux v6.1.8
+
 * Wed Jan 18 2023 Augusto Caringi <acaringi@redhat.com> [6.1.7-0]
 - enable efifb for Nvidia (Justin M. Forbes)
 - Linux v6.1.7
