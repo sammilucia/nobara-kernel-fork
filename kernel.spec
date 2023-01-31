@@ -889,7 +889,7 @@ Patch207: acso.patch
 
 # device specific patches
 Patch300: steam-deck.patch
-#Patch301: linux-surface.patch
+Patch301: linux-surface.patch
 
 # asus-linux: VMD fixes for M16
 Patch500: apsm-1.patch
@@ -906,7 +906,7 @@ Patch408: 0001-acpi-proc-idle-skip-dummy-wait.patch
 Patch409: 0001-drm-i915-quirks-disable-async-flipping-on-specific-d.patch
 
 # gamescope HDR
-#Patch410: gamescope-hdr.patch
+Patch410: gamescope-hdr.patch
 
 # asus-linux: Tablet mode stuff
 Patch505: 0001-HID-amd_sfh-Add-support-for-tablet-mode-switch-senso.patch
@@ -1513,7 +1513,7 @@ ApplyOptionalPatch acso.patch
 
 # device specific patches
 ApplyOptionalPatch steam-deck.patch
-#ApplyOptionalPatch linux-surface.patch
+ApplyOptionalPatch linux-surface.patch
 
 # asus-linux: VMD fixes for M16
 ApplyOptionalPatch apsm-1.patch
@@ -1529,7 +1529,7 @@ ApplyOptionalPatch 0001-acpi-proc-idle-skip-dummy-wait.patch
 ApplyOptionalPatch 0001-drm-i915-quirks-disable-async-flipping-on-specific-d.patch
 
 # gamescope HDR
-#ApplyOptionalPatch gamescope-hdr.patch
+ApplyOptionalPatch gamescope-hdr.patch
 
 # asus-linux: Tablet mode stuff
 ApplyOptionalPatch 0001-HID-amd_sfh-Add-support-for-tablet-mode-switch-senso.patch

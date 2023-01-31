@@ -819,4 +819,3 @@ index a0b0397e29ee4c..87a983a356530c 100644
  	spin_unlock(&zone->lock);
  	return allocated;
  }
-
