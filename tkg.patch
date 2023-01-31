@@ -494,8 +494,8 @@ index 4eab3d70e880..79669aa39d79 100644
  	    !blk_mq_is_shared_tags(q->tag_set->flags))
  		return NULL;
  
--	return elevator_get(q, "mq-deadline", false);
-+	return elevator_get(q, "bfq", false);
+-	return elevator_find_get(q, "mq-deadline");
++	return elevator_find_get(q, "bfq");
  }
  
  /*
@@ -770,7 +770,7 @@ diff --git a/mm/page_alloc.c b/mm/page_alloc.c
 index a0b0397e29ee4c..87a983a356530c 100644
 --- a/mm/page_alloc.c
 +++ b/mm/page_alloc.c
-@@ -3119,15 +3119,16 @@ __rmqueue(struct zone *zone, unsigned int order, int migratetype,
+@@ -3118,15 +3119,16 @@ __rmqueue(struct zone *zone, unsigned int order, int migratetype,
  }
 
  /*
@@ -785,6 +785,7 @@ index a0b0397e29ee4c..87a983a356530c 100644
  			unsigned long count, struct list_head *list,
  			int migratetype, unsigned int alloc_flags)
  {
+	unsigned long flags;
 -	int i, allocated = 0;
 +	const bool can_resched = !preempt_count() && !irqs_disabled();
 +	int i, allocated = 0, last_mod = 0;
