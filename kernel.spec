@@ -124,7 +124,7 @@ Summary: The Linux kernel
 #  to build the base kernel using the debug configuration. (Specifying
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
-# define buildid .local
+# define buildid .fsync
 %define specversion 6.2.0
 %define patchversion 6.2
 %define pkgrelease 0.rc6.47
@@ -883,6 +883,7 @@ Patch207: acso.patch
 # device specific patches
 Patch300: steam-deck.patch
 Patch301: linux-surface.patch
+Patch302: 0001-Add-legion-laptop-v0.1.patch
 
 # asus-linux: VMD fixes for M16
 Patch500: apsm-1.patch
@@ -892,6 +893,7 @@ Patch503: apsm-4.patch
 
 # temporary patches
 Patch401: 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
+# https://github.com/archlinux/linux/commit/7c4fed4d2afd27d7acb8835f8e79f49c99c03cdf
 Patch405: mt76_-mt7921_-Disable-powersave-features-by-default.patch
 #Patch407: 0001-Revert-drm-display-dp_mst-move-all-payload-info-into-the-atomic-state.patch
 Patch408: 0001-acpi-proc-idle-skip-dummy-wait.patch
@@ -1527,6 +1529,7 @@ ApplyOptionalPatch acso.patch
 # device specific patches
 ApplyOptionalPatch steam-deck.patch
 ApplyOptionalPatch linux-surface.patch
+ApplyOptionalPatch 0001-Add-legion-laptop-v0.1.patch
 
 # asus-linux: VMD fixes for M16
 ApplyOptionalPatch apsm-1.patch
