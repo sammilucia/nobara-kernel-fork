@@ -4,6 +4,9 @@
 # here before the %%install macro is pre-built.
 %global _default_patch_fuzz 2
 
+# Disable frame pointers
+%undefine _include_frame_pointers
+
 # Disable LTO in userspace packages.
 %global _lto_cflags %{nil}
 
@@ -92,6 +95,12 @@ Summary: The Linux kernel
 %global zipmodules 1
 %endif
 
+%ifarch x86_64
+%global efiuki 1
+%else
+%global efiuki 0
+%endif
+
 %if %{zipmodules}
 %global zipsed -e 's/\.ko$/\.ko.xz/'
 %endif
@@ -127,13 +136,13 @@ Summary: The Linux kernel
 # define buildid .fsync
 %define specversion 6.2.0
 %define patchversion 6.2
-%define pkgrelease 0.rc7.20230206gitd2d11f342b17.50
+%define pkgrelease 0.rc8.57
 %define kversion 6
-%define tarfile_release 6.2-rc7-2-gd2d11f342b17
+%define tarfile_release 6.2-rc8
 # This is needed to do merge window version magic
 %define patchlevel 2
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc7.20230206gitd2d11f342b17.50%{?buildid}%{?dist}
+%define specrelease 0.rc8.57%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.2.0
 
@@ -703,6 +712,19 @@ BuildRequires: llvm
 BuildRequires: lld
 %endif
 
+%if %{efiuki}
+BuildRequires: dracut
+# For dracut UEFI uki binaries
+BuildRequires: binutils
+# For the initrd
+BuildRequires: lvm2
+BuildRequires: systemd-boot-unsigned
+# For systemd-stub and systemd-pcrphase
+BuildRequires: systemd-udev >= 252-1
+# For TPM operations in UKI initramfs
+BuildRequires: tpm2-tools
+%endif
+
 # Because this is the kernel, it's hard to get a single upstream URL
 # to represent the base without needing to do a bunch of patching. This
 # tarball is generated from a src-git tree. If you want to see the
@@ -830,6 +852,8 @@ Source82: update_scripts.sh
 Source84: mod-internal.list
 Source85: mod-partner.list
 
+Source86: dracut-virt.conf
+
 Source100: rheldup3.x509
 Source101: rhelkpatch1.x509
 
@@ -873,6 +897,14 @@ Source4002: gating.yaml
 Patch1: patch-%{patchversion}-redhat.patch
 %endif
 
+# CachyOS and linux-next patches
+#Patch100: PATCH-v10-0-9-Add-latency-priority-for-CFS-class.patch
+#Patch101: 0001-amd_pstate-Add-guided-autonomous-mode-support.patch
+#Patch102: 0001-bore-tuning-sysctl.patch
+#Patch103: 0001-lrng.patch
+#Patch105: PATCH-v3-00-10-sched-fair-Avoid-unnecessary-migrations-within-SMT-domains.patch
+#Patch106: PATCH-v3-00-24-sched-Introduce-classes-of-tasks-for-load-balance.patch
+
 # linux-fsync patches
 Patch200: tkg.patch
 Patch202: fsync.patch
@@ -884,6 +916,7 @@ Patch207: acso.patch
 Patch300: steam-deck.patch
 Patch301: linux-surface.patch
 Patch302: 0001-Add-legion-laptop-v0.1.patch
+Patch303: asus_rgb_keyboard_support.patch
 
 # asus-linux: VMD fixes for M16
 Patch500: apsm-1.patch
@@ -895,12 +928,8 @@ Patch503: apsm-4.patch
 Patch401: 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
 # https://github.com/archlinux/linux/commit/7c4fed4d2afd27d7acb8835f8e79f49c99c03cdf
 Patch405: mt76_-mt7921_-Disable-powersave-features-by-default.patch
-#Patch407: 0001-Revert-drm-display-dp_mst-move-all-payload-info-into-the-atomic-state.patch
 Patch408: 0001-acpi-proc-idle-skip-dummy-wait.patch
 Patch409: 0001-drm-i915-quirks-disable-async-flipping-on-specific-d.patch
-
-# gamescope HDR
-#Patch410: gamescope-hdr.patch
 
 # asus-linux: Tablet mode stuff
 Patch505: 0001-HID-amd_sfh-Add-support-for-tablet-mode-switch-senso.patch
@@ -1379,6 +1408,13 @@ Requires: kernel-%{?1:%{1}-}-modules-core-uname-r = %{KVERREL}%{?1:+%{1}}\
 %endif\
 %{expand:%%kernel_debuginfo_package %{?1:%{1}}}\
 %endif\
+%if %{efiuki}\
+%package %{?1:%{1}-}uki-virt\
+Summary: %{variant_summary} unified kernel image for virtual machines\
+Provides: installonlypkg(kernel)\
+Provides: kernel-%{?1:%{1}-}uname-r = %{KVERREL}%{?1:+%{1}}\
+Requires: kernel%{?1:-%{1}}-modules-core-uname-r = %{KVERREL}%{?1:+%{1}}\
+%endif\
 %{nil}
 
 #
@@ -1447,6 +1483,14 @@ The kernel package contains the Linux kernel (vmlinuz), the core of any
 Linux operating system.  The kernel handles the basic functions
 of the operating system: memory allocation, process allocation, device
 input and output, etc.
+
+%if %{efiuki}
+%description debug-uki-virt
+Prebuilt debug unified kernel image for virtual machines.
+
+%description uki-virt
+Prebuilt default unified kernel image for virtual machines.
+%endif
 
 %if %{with_ipaclones}
 %kernel_ipaclones_package
@@ -1519,6 +1563,14 @@ cp -a %{SOURCE1} .
 ApplyOptionalPatch patch-%{patchversion}-redhat.patch
 %endif
 
+# CachyOS and linux-next patches
+#ApplyOptionalPatch PATCH-v10-0-9-Add-latency-priority-for-CFS-class.patch
+#ApplyOptionalPatch 0001-bore-tuning-sysctl.patch
+#ApplyOptionalPatch 0001-lrng.patch
+#ApplyOptionalPatch 0001-Per-VMA-locks.patch
+#ApplyOptionalPatch PATCH-v3-00-10-sched-fair-Avoid-unnecessary-migrations-within-SMT-domains.patch
+#ApplyOptionalPatch PATCH-v3-00-24-sched-Introduce-classes-of-tasks-for-load-balance.patch
+
 # linux-fsync patches
 ApplyOptionalPatch tkg.patch
 ApplyOptionalPatch fsync.patch
@@ -1530,6 +1582,7 @@ ApplyOptionalPatch acso.patch
 ApplyOptionalPatch steam-deck.patch
 ApplyOptionalPatch linux-surface.patch
 ApplyOptionalPatch 0001-Add-legion-laptop-v0.1.patch
+ApplyOptionalPatch asus_rgb_keyboard_support.patch
 
 # asus-linux: VMD fixes for M16
 ApplyOptionalPatch apsm-1.patch
@@ -1540,12 +1593,8 @@ ApplyOptionalPatch apsm-4.patch
 # temporary patches
 ApplyOptionalPatch 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
 ApplyOptionalPatch mt76_-mt7921_-Disable-powersave-features-by-default.patch
-#ApplyOptionalPatch 0001-Revert-drm-display-dp_mst-move-all-payload-info-into-the-atomic-state.patch
 ApplyOptionalPatch 0001-acpi-proc-idle-skip-dummy-wait.patch
 ApplyOptionalPatch 0001-drm-i915-quirks-disable-async-flipping-on-specific-d.patch
-
-# gamescope HDR
-#ApplyOptionalPatch gamescope-hdr.patch
 
 # asus-linux: Tablet mode stuff
 ApplyOptionalPatch 0001-HID-amd_sfh-Add-support-for-tablet-mode-switch-senso.patch
@@ -2268,6 +2317,45 @@ BuildKernel() {
 	touch lib/modules/$KernelVer/modules.builtin
     fi
 
+%if %{efiuki}
+    popd
+
+    KernelUnifiedImageDir="$RPM_BUILD_ROOT/lib/modules/$KernelVer"
+    KernelUnifiedImage="$KernelUnifiedImageDir/$InstallName-virt.efi"
+
+    mkdir -p $KernelUnifiedImageDir
+
+    dracut --conf=%{SOURCE86} \
+           --confdir=$(mktemp -d) \
+           --verbose \
+           --kver "$KernelVer" \
+           --kmoddir "$RPM_BUILD_ROOT/lib/modules/$KernelVer/" \
+           --logfile=$(mktemp) \
+           --uefi \
+           --kernel-image $(realpath $KernelImage) \
+           --kernel-cmdline 'console=tty0 console=ttyS0' \
+	   $KernelUnifiedImage
+
+%if %{signkernel}
+
+    %pesign -s -i $KernelUnifiedImage -o $KernelUnifiedImage.tmp -a %{secureboot_ca_0} -c %{secureboot_key_0} -n %{pesign_name_0}
+    %pesign -s -i $KernelUnifiedImage.tmp -o $KernelUnifiedImage.signed -a %{secureboot_ca_1} -c %{secureboot_key_1} -n %{pesign_name_1}
+    rm -f $KernelUnifiedImage.tmp
+
+    if [ ! -s $KernelUnifiedImage.signed ]; then
+      echo "pesigning failed"
+      exit 1
+    fi
+    mv $KernelUnifiedImage.signed $KernelUnifiedImage
+
+# signkernel
+%endif
+
+    pushd $RPM_BUILD_ROOT
+
+# efiuki
+%endif
+
     remove_depmod_files
 
     # Go back and find all of the various directories in the tree.  We use this
@@ -2964,12 +3052,14 @@ fi\
 # It also defines a %%postun script that does the same thing.
 #	%%kernel_modules_core_post [<subpackage>]
 #
+# FIXME: /bin/kernel-install can't handle UKIs (yet), so cleanup depmod files in %postun for now.
+#
 %define kernel_modules_core_post() \
 %{expand:%%posttrans %{?1:%{1}-}modules-core}\
 /sbin/depmod -a %{KVERREL}%{?1:+%{1}}\
 %{nil}\
 %{expand:%%postun %{?1:%{1}-}modules-core}\
-/sbin/depmod -a %{KVERREL}%{?1:+%{1}}\
+rm -f /lib/modules/%{KVERREL}%{?1:+%{1}}/modules.*\
 %{nil}
 
 # This macro defines a %%posttrans script for a kernel package.
@@ -3018,6 +3108,20 @@ touch %{_localstatedir}/lib/rpm-state/%{name}/installing_core_%{KVERREL}%{?-v:+%
 %{nil}
 
 #
+# This macro defines scripts for a kernel*-uki-virt package
+#
+# FIXME: /bin/kernel-install can't handle UKIs (yet), so just cp/rm as temporary stop-gap
+#
+%define kernel_uki_virt_scripts() \
+%{expand:%%posttrans %{?1:%{1}-}uki-virt}\
+mkdir -p /boot/efi/EFI/Linux\
+cp /lib/modules/%{KVERREL}%{?1:+%{1}}/vmlinuz-virt.efi /boot/efi/EFI/Linux/vmlinuz-%{KVERREL}%{?1:+%{1}}-virt.efi\
+%{nil}\
+%{expand:%%postun %{?1:%{1}-}uki-virt}\
+rm -f /boot/efi/EFI/Linux/vmlinuz-%{KVERREL}%{?1:+%{1}}-virt.efi\
+%{nil}
+
+#
 # This macro defines a %%preun script for a kernel package.
 #	%%kernel_variant_preun <subpackage>
 #
@@ -3030,6 +3134,10 @@ then\
 fi\
 %{nil}
 
+%if %{efiuki}
+%kernel_uki_virt_scripts
+%endif
+
 %kernel_variant_preun
 %kernel_variant_post -r kernel-smp
 
@@ -3039,6 +3147,9 @@ fi\
 %endif
 
 %if %{with_debug}
+%if %{efiuki}
+%kernel_uki_virt_scripts debug
+%endif
 %kernel_variant_preun debug
 %kernel_variant_post -v debug
 %endif
@@ -3283,6 +3394,11 @@ fi
 %{expand:%%files -f debuginfo%{?3}.list %{?3:%{3}-}debuginfo}\
 %endif\
 %endif\
+%if %{efiuki}\
+%{expand:%%files %{?3:%{3}-}uki-virt}\
+/lib/modules/%{KVERREL}%{?3:+%{3}}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-virt.efi\
+%ghost /%{image_install_path}/efi/EFI/Linux/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?3:+%{3}}-virt.efi\
+%endif\
 %if %{?3:1} %{!?3:0}\
 %{expand:%%files %{3}}\
 %endif\
@@ -3321,6 +3437,33 @@ fi
 #
 #
 %changelog
+* Mon Feb 13 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.2.0-0.rc8.57]
+- Disable frame pointers (Justin M. Forbes)
+
+* Mon Feb 13 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.2.0-0.rc8.56]
+- Linux v6.2.0-0.rc8
+
+* Sun Feb 12 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.2.0-0.rc7.f339c2597ebb.55]
+- Linux v6.2.0-0.rc7.f339c2597ebb
+
+* Sat Feb 11 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.2.0-0.rc7.420b2d431d18.54]
+- Fedora configs for 6.2 (Justin M. Forbes)
+- Linux v6.2.0-0.rc7.420b2d431d18
+
+* Fri Feb 10 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.2.0-0.rc7.38c1e0c65865.53]
+- redhat: Repair ELN build broken by the recent UKI changes (Vitaly Kuznetsov)
+- Linux v6.2.0-0.rc7.38c1e0c65865
+
+* Wed Feb 08 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.2.0-0.rc7.0983f6bf2bfc.52]
+- redhat/configs: enable CONFIG_INET_DIAG_DESTROY (Andrea Claudi)
+- Enable TDX Guest driver (Vitaly Kuznetsov)
+- Linux v6.2.0-0.rc7.0983f6bf2bfc
+
+* Tue Feb 07 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.2.0-0.rc7.05ecb680708a.51]
+- redhat/configs: Enable CONFIG_PCIE_PTM generically (Corinna Vinschen)
+- redhat: Add sub-RPM with a EFI unified kernel image for virtual machines (Vitaly Kuznetsov)
+- Linux v6.2.0-0.rc7.05ecb680708a
+
 * Mon Feb 06 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.2.0-0.rc7.d2d11f342b17.50]
 - redhat/Makefile: Remove GIT deprecated message (Prarit Bhargava)
 - Revert "redhat: configs: Disable xtables and ipset" (Phil Sutter)

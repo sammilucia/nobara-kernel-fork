@@ -1,0 +1,597 @@
+From: "Luke D. Jones" <luke@ljones.dev>
+To: hdegoede@redhat.com
+Cc: markgross@kernel.org, platform-driver-x86@vger.kernel.org,
+	linux-kernel@vger.kernel.org, "Luke D. Jones" <luke@ljones.dev>
+Subject: [PATCH 0/4] asus-wmi: Add support for RGB keyboards
+Date: Fri,  5 Aug 2022 20:19:04 +1200	[thread overview]
+Message-ID: <20220805081909.10962-1-luke@ljones.dev> (raw)
+
+This is a patch series to add RGB support for ASUS laptops.
+The laptops with this RGB tend to be the TUF series of gamer laptops.
+
+The first step is initial bringup of support using the multicolor LED API.
+
+These types of keyboards implement a slightly more complex interface than
+just RGB control however - they also have modes with can be static LED,
+blinking, rainbow, color cycles, and more. They also have some custom
+animations that can play depending on device state, such as suspended
+playing a fancy colour cycle, or playing a "wave" animation.
+
+Two of the patches add support for these features.
+
+The last patch adds documentation in:
+Documentation/ABI/testing/sysfs-platform-asus-wmi
+
+Some notes:
+
+- this patch series obsoletes the previous RGB patches by myself
+
+- it is not possible to add attribute groups to multicolor LED as
+  they get overwritten by `led_multicolor_groups` in
+  `led_classdev_multicolor_register_ext`.
+
+- the methods for RGB control do not provide a way to fetch exisiting
+  state, so these methods are WO.
+
+- There is an existing `asus::kbd_backlight`, this provides a 4-step
+  brightness to the RGB (off,low,med,high) individually to multicolor.
+  I was unsure of the effect of adding a similar path so have used the
+  `asus::multicolour::kbd_backlight` name to be clear about purpose.
+  If the `asus::kbd_backlight` is off, then no RGB is shown at all.\
+
+I'm hopeful that this patch series addresses all previous feedback related
+to the obsoleted patches.
+
+Luke D. Jones (4):
+  asus-wmi: Add basic support for TUF laptop keyboard RGB
+  asus-wmi: Add support for TUF laptop keyboard RGB mode control
+  asus-wmi: Add support for TUF laptop keyboard states
+  asus-wmi: Document many of the undocumented API
+
+ .../ABI/testing/sysfs-platform-asus-wmi       |  50 ++++
+ drivers/platform/x86/asus-wmi.c               | 263 +++++++++++++++++-
+ include/linux/platform_data/x86/asus-wmi.h    |   5 +
+ 3 files changed, 311 insertions(+), 7 deletions(-)
+
+--
+2.37.1
+
+From: "Luke D. Jones" <luke@ljones.dev>
+To: hdegoede@redhat.com
+Cc: markgross@kernel.org, platform-driver-x86@vger.kernel.org,
+	linux-kernel@vger.kernel.org, "Luke D. Jones" <luke@ljones.dev>
+Subject: [PATCH 1/4] asus-wmi: Add basic support for TUF laptop keyboard RGB
+Date: Fri,  5 Aug 2022 20:19:05 +1200	[thread overview]
+Message-ID: <20220805081909.10962-2-luke@ljones.dev> (raw)
+In-Reply-To: <20220805081909.10962-1-luke@ljones.dev>
+
+Adds support for TUF laptop RGB control via the multicolor LED API.
+
+As this is the base essentials for adjusting the RGB, it sets the
+default mode of the keyboard to static. This overwrites the booted
+state of the keyboard.
+
+Signed-off-by: Luke D. Jones <luke@ljones.dev>
+---
+ drivers/platform/x86/asus-wmi.c            | 89 ++++++++++++++++++++++
+ include/linux/platform_data/x86/asus-wmi.h |  3 +
+ 2 files changed, 92 insertions(+)
+
+diff --git a/drivers/platform/x86/asus-wmi.c b/drivers/platform/x86/asus-wmi.c
+index f051b2165..1a7b860cb 100644
+--- a/drivers/platform/x86/asus-wmi.c
++++ b/drivers/platform/x86/asus-wmi.c
+@@ -25,6 +25,7 @@
+ #include <linux/input/sparse-keymap.h>
+ #include <linux/kernel.h>
+ #include <linux/leds.h>
++#include <linux/led-class-multicolor.h>
+ #include <linux/module.h>
+ #include <linux/pci.h>
+ #include <linux/pci_hotplug.h>
+@@ -192,6 +193,11 @@ struct fan_curve_data {
+ 	u8 percents[FAN_CURVE_POINTS];
+ };
+ 
++struct keyboard_rgb_led {
++	struct led_classdev_mc dev;
++	struct mc_subled subled_info[3]; /* r g b */
++};
++
+ struct asus_wmi {
+ 	int dsts_id;
+ 	int spec;
+@@ -243,6 +249,9 @@ struct asus_wmi {
+ 	bool kbd_rgb_mode_available;
+ 	bool kbd_rgb_state_available;
+ 
++	bool keyboard_rgb_mode_available;
++	struct keyboard_rgb_led keyboard_rgb_mode;
++
+ 	bool throttle_thermal_policy_available;
+ 	u8 throttle_thermal_policy_mode;
+ 
+@@ -1146,6 +1155,35 @@ static int micmute_led_set(struct led_classdev *led_cdev,
+ 	return err < 0 ? err : 0;
+ }
+ 
++static int tuf_rgb_brightness_set(struct led_classdev *cdev,
++	enum led_brightness brightness)
++{
++	u8 r, g, b;
++	int err;
++	u32 ret;
++
++	struct led_classdev_mc *mc_cdev = lcdev_to_mccdev(cdev);
++
++	led_mc_calc_color_components(mc_cdev, brightness);
++	r = mc_cdev->subled_info[0].brightness;
++	g = mc_cdev->subled_info[1].brightness;
++	b = mc_cdev->subled_info[2].brightness;
++
++	/* Writing out requires some defaults. This will overwrite boot mode */
++	err = asus_wmi_evaluate_method3(ASUS_WMI_METHODID_DEVS, ASUS_WMI_DEVID_TUF_RGB_MODE,
++			1 | 0 | (r << 16) | (g << 24), (b) | 0, &ret);
++	if (err) {
++		pr_err("Unable to set TUF RGB data?\n");
++		return err;
++	}
++	return 0;
++}
++
++static enum led_brightness tuf_rgb_brightness_get(struct led_classdev *cdev)
++{
++	return cdev->brightness;
++}
++
+ static void asus_wmi_led_exit(struct asus_wmi *asus)
+ {
+ 	led_classdev_unregister(&asus->kbd_led);
+@@ -1245,6 +1283,57 @@ static int asus_wmi_led_init(struct asus_wmi *asus)
+ 			goto error;
+ 	}
+ 
++	if (asus_wmi_dev_is_present(asus, ASUS_WMI_DEVID_TUF_RGB_MODE)) {
++		struct led_classdev_mc *mc_cdev;
++		struct mc_subled *mc_led_info;
++		u8 brightness = 127;
++
++		mc_cdev = &asus->keyboard_rgb_mode.dev;
++
++		/*
++		 * asus::kbd_backlight still controls a base 3-level backlight and when
++		 * it is on 0, the RGB is not visible at all. RGB should be treated as
++		 * an additional step.
++		 */
++		mc_cdev->led_cdev.name = "asus::multicolour::kbd_backlight";
++		mc_cdev->led_cdev.flags = LED_CORE_SUSPENDRESUME | LED_RETAIN_AT_SHUTDOWN;
++		mc_cdev->led_cdev.brightness_set_blocking = tuf_rgb_brightness_set;
++		mc_cdev->led_cdev.brightness_get = tuf_rgb_brightness_get;
++
++		/* Let the multicolour LED own the info */
++		mc_led_info = devm_kmalloc_array(
++			&asus->platform_device->dev,
++			3,
++			sizeof(*mc_led_info),
++			GFP_KERNEL | __GFP_ZERO);
++
++		if (!mc_led_info)
++			return -ENOMEM;
++
++		mc_led_info[0].color_index = LED_COLOR_ID_RED;
++		mc_led_info[1].color_index = LED_COLOR_ID_GREEN;
++		mc_led_info[2].color_index = LED_COLOR_ID_BLUE;
++
++		/*
++		 * It's not possible to get last set data from device so set defaults
++		 * to make it safe for a user to change either RGB or modes. We don't
++		 * write these defaults to the device because they will overwrite a
++		 * users last saved boot setting (in NVRAM).
++		 */
++		mc_cdev->led_cdev.brightness = brightness;
++		mc_cdev->led_cdev.max_brightness = brightness;
++		mc_led_info[0].intensity = brightness;
++		mc_led_info[0].brightness = mc_cdev->led_cdev.brightness;
++		mc_led_info[1].brightness = mc_cdev->led_cdev.brightness;
++		mc_led_info[2].brightness = mc_cdev->led_cdev.brightness;
++		led_mc_calc_color_components(mc_cdev, brightness);
++
++		mc_cdev->subled_info = mc_led_info;
++		mc_cdev->num_colors = 3;
++
++		rv = led_classdev_multicolor_register(&asus->platform_device->dev, mc_cdev);
++	}
++
+ error:
+ 	if (rv)
+ 		asus_wmi_led_exit(asus);
+diff --git a/include/linux/platform_data/x86/asus-wmi.h b/include/linux/platform_data/x86/asus-wmi.h
+index 28234dc9f..2c8c851f5 100644
+--- a/include/linux/platform_data/x86/asus-wmi.h
++++ b/include/linux/platform_data/x86/asus-wmi.h
+@@ -110,6 +110,9 @@
+ /* TUF laptop RGB power/state */
+ #define ASUS_WMI_DEVID_TUF_RGB_STATE	0x00100057
+ 
++/* TUF laptop RGB control */
++#define ASUS_WMI_DEVID_TUF_RGB_MODE	0x00100056
++
+ /* DSTS masks */
+ #define ASUS_WMI_DSTS_STATUS_BIT	0x00000001
+ #define ASUS_WMI_DSTS_UNKNOWN_BIT	0x00000002
+-- 
+2.39.1
+
+From: "Luke D. Jones" <luke@ljones.dev>
+To: hdegoede@redhat.com
+Cc: markgross@kernel.org, platform-driver-x86@vger.kernel.org,
+	linux-kernel@vger.kernel.org, "Luke D. Jones" <luke@ljones.dev>
+Subject: [PATCH 2/4] asus-wmi: Add support for TUF laptop keyboard RGB mode control
+Date: Fri,  5 Aug 2022 20:19:06 +1200	[thread overview]
+Message-ID: <20220805081909.10962-3-luke@ljones.dev> (raw)
+In-Reply-To: <20220805081909.10962-1-luke@ljones.dev>
+
+Adds support for TUF laptop RGB mode control.
+
+Two paths are added:
+- /sys/devices/platform/asus-nb-wmi/kernel_rgb_mode
+- /sys/devices/platform/asus-nb-wmi/kernel_rgb_mode_index
+
+Signed-off-by: Luke D. Jones <luke@ljones.dev>
+---
+ drivers/platform/x86/asus-wmi.c | 86 +++++++++++++++++++++++++++++++++
+ 1 file changed, 86 insertions(+)
+
+diff --git a/drivers/platform/x86/asus-wmi.c b/drivers/platform/x86/asus-wmi.c
+index 1a7b860cb..575027797 100644
+--- a/drivers/platform/x86/asus-wmi.c
++++ b/drivers/platform/x86/asus-wmi.c
+@@ -120,6 +120,9 @@ static const char * const ashs_ids[] = { "ATK4001", "ATK4002", NULL };
+ 
+ static int throttle_thermal_policy_write(struct asus_wmi *);
+ 
++static int tuf_rgb_brightness_set(struct led_classdev *cdev,
++							enum led_brightness brightness);
++
+ static bool ashs_present(void)
+ {
+ 	int i = 0;
+@@ -196,6 +199,9 @@ struct fan_curve_data {
+ struct keyboard_rgb_led {
+ 	struct led_classdev_mc dev;
+ 	struct mc_subled subled_info[3]; /* r g b */
++	u8 save;
++	u8 mode;
++	u8 speed;
+ };
+ 
+ struct asus_wmi {
+@@ -851,6 +857,72 @@ static const struct attribute_group *kbd_rgb_mode_groups[] = {
+ 	NULL,
+ };
+ 
++/* TUF Laptop Keyboard RGB Modes **********************************************/
++static int keyboard_rgb_mode_check_present(struct asus_wmi *asus)
++{
++	u32 result;
++	int err;
++
++	asus->keyboard_rgb_mode_available = false;
++
++	err = asus_wmi_get_devstate(asus, ASUS_WMI_DEVID_TUF_RGB_MODE, &result);
++	if (err) {
++		if (err == -ENODEV)
++			return 0;
++		return err;
++	}
++
++	if (result & ASUS_WMI_DSTS_PRESENCE_BIT) {
++		asus->keyboard_rgb_mode_available = true;
++	}
++
++	return 0;
++}
++
++static ssize_t keyboard_rgb_mode_store(struct device *device,
++				 struct device_attribute *attr,
++				 const char *buf, size_t count)
++{
++	u8 save, mode, speed;
++	int err;
++
++	struct asus_wmi *asus = dev_get_drvdata(device);
++	struct led_classdev *cdev = &asus->keyboard_rgb_mode.dev.led_cdev;
++
++	if (sscanf(buf, "%hhd %hhd %hhd", &save, &mode, &speed) != 3)
++		return -EINVAL;
++
++	asus->keyboard_rgb_mode.save = save > 0 ? 1 : 0;
++
++	/* These are the known usable modes across all TUF/ROG */
++	asus->keyboard_rgb_mode.mode = mode < 12 && mode != 9 ? mode : 0x0a;
++
++	if (speed == 0)
++		asus->keyboard_rgb_mode.speed = 0xe1;
++	else if (speed == 1)
++		asus->keyboard_rgb_mode.speed = 0xeb;
++	else if (speed == 2)
++		asus->keyboard_rgb_mode.speed = 0xf5;
++	else
++		asus->keyboard_rgb_mode.speed = 0xeb;
++
++	err = tuf_rgb_brightness_set(cdev, cdev->brightness);
++	if (err)
++		return err;
++	return 0;
++}
++
++static DEVICE_ATTR_WO(keyboard_rgb_mode);
++
++static ssize_t keyboard_rgb_mode_index_show(struct device *device,
++						 struct device_attribute *attr,
++						 char *buf)
++{
++	return sysfs_emit(buf, "%s\n", "save mode speed\n");
++}
++
++static DEVICE_ATTR_RO(keyboard_rgb_mode_index);
++
+ /* Battery ********************************************************************/
+ 
+ /* The battery maximum charging percentage */
+@@ -1320,6 +1392,9 @@ static int asus_wmi_led_init(struct asus_wmi *asus)
+ 		 * write these defaults to the device because they will overwrite a
+ 		 * users last saved boot setting (in NVRAM).
+ 		 */
++		asus->keyboard_rgb_mode.save = 1;
++		asus->keyboard_rgb_mode.mode = 0;
++		asus->keyboard_rgb_mode.speed = 1;
+ 		mc_cdev->led_cdev.brightness = brightness;
+ 		mc_cdev->led_cdev.max_brightness = brightness;
+ 		mc_led_info[0].intensity = brightness;
+@@ -3544,6 +3619,8 @@ static struct attribute *platform_attributes[] = {
+ 	&dev_attr_touchpad.attr,
+ 	&dev_attr_egpu_enable.attr,
+ 	&dev_attr_dgpu_disable.attr,
++	&dev_attr_keyboard_rgb_mode.attr,
++	&dev_attr_keyboard_rgb_mode_index.attr,
+ 	&dev_attr_gpu_mux_mode.attr,
+ 	&dev_attr_lid_resume.attr,
+ 	&dev_attr_als_enable.attr,
+@@ -3575,6 +3652,10 @@ static umode_t asus_sysfs_is_visible(struct kobject *kobj,
+ 		ok = asus->egpu_enable_available;
+ 	else if (attr == &dev_attr_dgpu_disable.attr)
+ 		ok = asus->dgpu_disable_available;
++	else if (attr == &dev_attr_keyboard_rgb_mode.attr)
++		ok = asus->keyboard_rgb_mode_available;
++	else if (attr == &dev_attr_keyboard_rgb_mode_index.attr)
++		ok = asus->keyboard_rgb_mode_available;
+ 	else if (attr == &dev_attr_gpu_mux_mode.attr)
+ 		ok = asus->gpu_mux_mode_available;
+ 	else if (attr == &dev_attr_fan_boost_mode.attr)
+@@ -3844,6 +3925,10 @@ static int asus_wmi_add(struct platform_device *pdev)
+ 	asus->kbd_rgb_state_available = asus_wmi_dev_is_present(asus, ASUS_WMI_DEVID_TUF_RGB_STATE);
+ 	asus->panel_overdrive_available = asus_wmi_dev_is_present(asus, ASUS_WMI_DEVID_PANEL_OD);
+ 
++	err = keyboard_rgb_mode_check_present(asus);
++	if (err)
++		goto fail_keyboard_rgb_mode;
++
+ 	err = fan_boost_mode_check_present(asus);
+ 	if (err)
+ 		goto fail_fan_boost_mode;
+@@ -3940,6 +4025,7 @@ static int asus_wmi_add(struct platform_device *pdev)
+ 	if (asus->platform_profile_support)
+ 		platform_profile_remove();
+ fail_fan_boost_mode:
++fail_keyboard_rgb_mode:
+ fail_platform:
+ 	kfree(asus);
+ 	return err;
+-- 
+2.37.1
+
+From: "Luke D. Jones" <luke@ljones.dev>
+To: hdegoede@redhat.com
+Cc: markgross@kernel.org, platform-driver-x86@vger.kernel.org,
+	linux-kernel@vger.kernel.org, "Luke D. Jones" <luke@ljones.dev>
+Subject: [PATCH 3/4] asus-wmi: Add support for TUF laptop keyboard states
+Date: Fri,  5 Aug 2022 20:19:07 +1200	[thread overview]
+Message-ID: <20220805081909.10962-4-luke@ljones.dev> (raw)
+In-Reply-To: <20220805081909.10962-1-luke@ljones.dev>
+
+Adds support for the TUF series laptop power states.
+
+Adds two paths:
+- /sys/devices/platform/asus-nb-wmi/keyboard_rgb_state
+- /sys/devices/platform/asus-nb-wmi/keyboard_rgb_state_index
+
+Signed-off-by: Luke D. Jones <luke@ljones.dev>
+---
+ drivers/platform/x86/asus-wmi.c            | 74 ++++++++++++++++++++++
+ include/linux/platform_data/x86/asus-wmi.h |  2 +
+ 2 files changed, 76 insertions(+)
+
+diff --git a/drivers/platform/x86/asus-wmi.c b/drivers/platform/x86/asus-wmi.c
+index 575027797..bb03213ed 100644
+--- a/drivers/platform/x86/asus-wmi.c
++++ b/drivers/platform/x86/asus-wmi.c
+@@ -255,6 +255,7 @@ struct asus_wmi {
+ 	bool kbd_rgb_mode_available;
+ 	bool kbd_rgb_state_available;
+ 
++	bool keyboard_rgb_state_available;
+ 	bool keyboard_rgb_mode_available;
+ 	struct keyboard_rgb_led keyboard_rgb_mode;
+ 
+@@ -923,6 +924,68 @@ static ssize_t keyboard_rgb_mode_index_show(struct device *device,
+ 
+ static DEVICE_ATTR_RO(keyboard_rgb_mode_index);
+ 
++/* TUF Laptop Keyboard RGB States *********************************************/
++static int keyboard_rgb_state_check_present(struct asus_wmi *asus)
++{
++	u32 result;
++	int err;
++
++	asus->keyboard_rgb_state_available = false;
++
++	err = asus_wmi_get_devstate(asus, ASUS_WMI_DEVID_TUF_RGB_STATE, &result);
++	if (err) {
++		if (err == -ENODEV)
++			return 0;
++		return err;
++	}
++
++	if (result & ASUS_WMI_DSTS_PRESENCE_BIT)
++		asus->keyboard_rgb_state_available = true;
++
++	return 0;
++}
++
++static ssize_t keyboard_rgb_state_store(struct device *dev,
++				   struct device_attribute *attr,
++				   const char *buf, size_t count)
++{
++	u8 flags, save, boot, awake, sleep, keyboard;
++	int err;
++	u32 ret;
++
++	flags = 0;
++	if (sscanf(buf, "%hhd %hhd %hhd %hhd %hhd", &save, &boot, &awake, &sleep, &keyboard) != 5)
++		return -EINVAL;
++
++	save = save == 0 ? 0x0100 : 0x0000;
++	if (boot)
++		flags |= 0x02;
++	if (awake)
++		flags |= 0x08;
++	if (sleep)
++		flags |= 0x20;
++	if (keyboard)
++		flags |= 0x80;
++
++	err = asus_wmi_evaluate_method3(ASUS_WMI_METHODID_DEVS,
++			ASUS_WMI_DEVID_TUF_RGB_STATE, 0xBD | save | (flags << 16), 0, &ret);
++	if (err)
++		return err;
++
++	return count;
++}
++
++static DEVICE_ATTR_WO(keyboard_rgb_state);
++
++static ssize_t keyboard_rgb_state_index_show(struct device *device,
++						 struct device_attribute *attr,
++						 char *buf)
++{
++	return sysfs_emit(buf, "%s\n", "save boot awake sleep keyboard\n");
++}
++
++static DEVICE_ATTR_RO(keyboard_rgb_state_index);
++
+ /* Battery ********************************************************************/
+ 
+ /* The battery maximum charging percentage */
+@@ -3621,6 +3684,8 @@ static struct attribute *platform_attributes[] = {
+ 	&dev_attr_dgpu_disable.attr,
+ 	&dev_attr_keyboard_rgb_mode.attr,
+ 	&dev_attr_keyboard_rgb_mode_index.attr,
++	&dev_attr_keyboard_rgb_state.attr,
++	&dev_attr_keyboard_rgb_state_index.attr,
+ 	&dev_attr_gpu_mux_mode.attr,
+ 	&dev_attr_lid_resume.attr,
+ 	&dev_attr_als_enable.attr,
+@@ -3656,6 +3721,10 @@ static umode_t asus_sysfs_is_visible(struct kobject *kobj,
+ 		ok = asus->keyboard_rgb_mode_available;
+ 	else if (attr == &dev_attr_keyboard_rgb_mode_index.attr)
+ 		ok = asus->keyboard_rgb_mode_available;
++	else if (attr == &dev_attr_keyboard_rgb_state.attr)
++		ok = asus->keyboard_rgb_state_available;
++	else if (attr == &dev_attr_keyboard_rgb_state_index.attr)
++		ok = asus->keyboard_rgb_state_available;
+ 	else if (attr == &dev_attr_gpu_mux_mode.attr)
+ 		ok = asus->gpu_mux_mode_available;
+ 	else if (attr == &dev_attr_fan_boost_mode.attr)
+@@ -3929,6 +3998,10 @@ static int asus_wmi_add(struct platform_device *pdev)
+ 	if (err)
+ 		goto fail_keyboard_rgb_mode;
+ 
++	err = keyboard_rgb_state_check_present(asus);
++	if (err)
++		goto fail_keyboard_rgb_state;
++
+ 	err = fan_boost_mode_check_present(asus);
+ 	if (err)
+ 		goto fail_fan_boost_mode;
+@@ -4026,6 +4099,7 @@ static int asus_wmi_add(struct platform_device *pdev)
+ 		platform_profile_remove();
+ fail_fan_boost_mode:
+ fail_keyboard_rgb_mode:
++fail_keyboard_rgb_state:
+ fail_platform:
+ 	kfree(asus);
+ 	return err;
+diff --git a/include/linux/platform_data/x86/asus-wmi.h b/include/linux/platform_data/x86/asus-wmi.h
+index d63c9945a17d..b5c966798ef8 100644
+--- a/include/linux/platform_data/x86/asus-wmi.h
++++ b/include/linux/platform_data/x86/asus-wmi.h
+@@ -100,6 +100,8 @@
+ 
+ /* TUF laptop RGB control */
+ #define ASUS_WMI_DEVID_TUF_RGB_MODE	0x00100056
++/* TUF laptop RGB state control */
++#define ASUS_WMI_DEVID_TUF_RGB_STATE	0x00100057
+ 
+ /* DSTS masks */
+ #define ASUS_WMI_DSTS_STATUS_BIT	0x00000001
+-- 
+2.37.1
+
+
+From: "Luke D. Jones" <luke@ljones.dev>
+To: hdegoede@redhat.com
+Cc: markgross@kernel.org, platform-driver-x86@vger.kernel.org,
+	linux-kernel@vger.kernel.org, "Luke D. Jones" <luke@ljones.dev>
+Subject: [PATCH 4/4] asus-wmi: Document many of the undocumented API
+Date: Fri,  5 Aug 2022 20:19:08 +1200	[thread overview]
+Message-ID: <20220805081909.10962-5-luke@ljones.dev> (raw)
+In-Reply-To: <20220805081909.10962-1-luke@ljones.dev>
+
+Signed-off-by: Luke D. Jones <luke@ljones.dev>
+---
+ Documentation/ABI/testing/sysfs-platform-asus-wmi | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/Documentation/ABI/testing/sysfs-platform-asus-wmi b/Documentation/ABI/testing/sysfs-platform-asus-wmi
+index a77a004a1..bc81f5e06 100644
+--- a/Documentation/ABI/testing/sysfs-platform-asus-wmi
++++ b/Documentation/ABI/testing/sysfs-platform-asus-wmi
+@@ -90,6 +90,21 @@ Description:
+ 			* 0 - Disable,
+ 			* 1 - Enable
+ 
++What:          /sys/devices/platform/<platform>/keyboard_rgb_mode
++Date:          Dec 2022
++KernelVersion: 5.20
++Contact:       "Luke Jones" <luke@ljones.dev>
++Description:
++               Set some RGB keyboard modes and features (write-only).
++
++               The accepted input is "save mode speed", where "n n n" options
++               are:
++                       * save - 0 or 1, if 0 then settings are not retained on boot
++                       * mode - 0 to 12, each is an RGB such as static, rainbow, pulse.
++                                       Not all keyboards accept every mode.
++                       * speed - 0, 1, 2, equal to low, medium, high.
++                                       Only applies to certain modes.
++
+ What:		/sys/devices/platform/<platform>/panel_od
+ Date:		Aug 2022
+ KernelVersion:	5.17
+-- 
+2.37.1
+
+
+
+
