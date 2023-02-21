@@ -120,7 +120,7 @@ index 000000000000..effb81d04bfd
 +
 +endmenu
 diff --git a/Makefile b/Makefile
-index 716a975730a6..80ffb773f08e 100644
+index 3f6628780eb2..0aca431f9bae 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -22,6 +22,10 @@ $(if $(filter __%, $(MAKECMDGOALS)), \
@@ -250,10 +250,10 @@ index 696c9e007a36..80a56c8eaaae 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index 9cfca3d7d0e2..3372f258374e 100644
+index f3cc7699e1e1..78d9e00d3327 100644
 --- a/arch/x86/kernel/cpu/common.c
 +++ b/arch/x86/kernel/cpu/common.c
-@@ -1565,6 +1565,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
+@@ -1570,6 +1570,7 @@ static void __init early_identify_cpu(struct cpuinfo_x86 *c)
  		cpu_detect(c);
  		get_cpu_vendor(c);
  		get_cpu_cap(c);
@@ -1950,7 +1950,7 @@ index 979b776e3bcb..4eabcc0d8a91 100644
 
  struct taint_flag {
 diff --git a/include/linux/pci.h b/include/linux/pci.h
-index adffd65e84b4..71bf861dc270 100644
+index 254c8a4126a8..c0f718911aa9 100644
 --- a/include/linux/pci.h
 +++ b/include/linux/pci.h
 @@ -1520,6 +1520,22 @@ int pci_add_dynid(struct pci_driver *drv,

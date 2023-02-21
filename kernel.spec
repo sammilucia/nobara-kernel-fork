@@ -36,6 +36,18 @@
 %global buildroot %{_buildrootdir}/%{NAME}-%{VERSION}-%{RELEASE}.%{_build_cpu}
 %endif
 
+# RPM macros strip everything in BUILDROOT, either with __strip
+# or find-debuginfo.sh. Make use of __spec_install_post override
+# and save/restore binaries we want to package as unstripped.
+%define buildroot_unstripped %{_builddir}/root_unstripped
+%define buildroot_save_unstripped() \
+(cd %{buildroot}; cp -rav --parents -t %{buildroot_unstripped}/ %1 || true) \
+%{nil}
+%define __restore_unstripped_root_post \
+    echo "Restoring unstripped artefacts %{buildroot_unstripped} -> %{buildroot}" \
+    cp -rav %{buildroot_unstripped}/. %{buildroot}/ \
+%{nil}
+
 # The kernel's %%install section is special
 # Normally the %%install section starts by cleaning up the BUILD_ROOT
 # like so:
@@ -136,13 +148,13 @@ Summary: The Linux kernel
 # define buildid .fsync
 %define specversion 6.2.0
 %define patchversion 6.2
-%define pkgrelease 0.rc8.57
+%define pkgrelease 63
 %define kversion 6
-%define tarfile_release 6.2-rc8
+%define tarfile_release 6.2
 # This is needed to do merge window version magic
 %define patchlevel 2
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc8.57%{?buildid}%{?dist}
+%define specrelease 63%{?buildid}%{?dist}
 # This defines the kabi tarball version
 %define kabiversion 6.2.0
 
@@ -488,8 +500,8 @@ Summary: The Linux kernel
 %define all_arch_configs kernel-%{version}-aarch64*.config
 %define asmarch arm64
 %define hdrarch arm64
-%define make_target Image.gz
-%define kernel_image arch/arm64/boot/Image.gz
+%define make_target vmlinuz.efi
+%define kernel_image arch/arm64/boot/vmlinuz.efi
 %endif
 
 # Should make listnewconfig fail if there's config options
@@ -1750,6 +1762,9 @@ cd ..
 ###
 %build
 
+rm -rf %{buildroot_unstripped} || true
+mkdir -p %{buildroot_unstripped}
+
 %if %{with_sparse}
 %define sparse_mflags	C=1
 %endif
@@ -2605,6 +2620,7 @@ for dir in bpf bpf/no_alu32 bpf/progs; do
 		-name '*.o' -exec sh -c 'readelf -h "{}" | grep -q "^  Machine:.*BPF"' \; \) -print0 | \
 	xargs -0 cp -t %{buildroot}%{_libexecdir}/kselftests/$dir || true
 done
+%buildroot_save_unstripped "usr/libexec/kselftests/bpf/test_progs"
 popd
 export -n BPFTOOL
 %endif
@@ -2681,6 +2697,7 @@ find Documentation -type d | xargs chmod u+w
   %{__arch_install_post}\
   %{__os_install_post}\
   %{__remove_unwanted_dbginfo_install_post}\
+  %{__restore_unstripped_root_post}\
   %{__modsign_install_post}
 
 ###
@@ -3437,8 +3454,39 @@ fi
 #
 #
 %changelog
-* Mon Feb 13 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.2.0-0.rc8.57]
+* Mon Feb 20 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.2.0-63]
+- Linux v6.2.0
+
+* Sun Feb 19 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.2.0-0.rc8.925cf0457d7e.62]
+- Linux v6.2.0-0.rc8.925cf0457d7e
+
+* Sat Feb 18 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.2.0-0.rc8.38f8ccde04a3.61]
+- redhat/configs: Enable UCSI_CCG support (David Marlin)
+- Linux v6.2.0-0.rc8.38f8ccde04a3
+
+* Fri Feb 17 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.2.0-0.rc8.ec35307e18ba.60]
+- Linux v6.2.0-0.rc8.ec35307e18ba
+
+* Thu Feb 16 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.2.0-0.rc8.033c40a89f55.59]
+- Fix underline mark-up after text change (Justin M. Forbes)
+- Turn on CONFIG_XFS_RT for Fedora (Justin M. Forbes)
+- Linux v6.2.0-0.rc8.033c40a89f55
+
+* Wed Feb 15 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.2.0-0.rc8.e1c04510f521.58]
+- Consolidate common configs for 6.2 (Justin M. Forbes)
+- aarch64: enable zboot (Gerd Hoffmann)
+- redhat: remove duplicate pending-rhel config items (Patrick Talbert)
 - Disable frame pointers (Justin M. Forbes)
+- Linux v6.2.0-0.rc8.e1c04510f521
+
+* Tue Feb 14 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.2.0-0.rc8.f6feea56f66d.57]
+- redhat/configs: update scripts and docs for ark -> rhel rename (Clark Williams)
+- redhat/configs: rename ark configs dir to rhel (Clark Williams)
+- Turn off CONFIG_DEBUG_INFO_COMPRESSED_ZLIB for ppc64le (Justin M. Forbes)
+- kernel.spec: package unstripped kselftests/bpf/test_progs (Jan Stancek)
+- kernel.spec: allow to package some binaries as unstripped (Jan Stancek)
+- redhat/configs: Make merge.py portable for older python (Desnes Nunes)
+- Linux v6.2.0-0.rc8.f6feea56f66d
 
 * Mon Feb 13 2023 Fedora Kernel Team <kernel-team@fedoraproject.org> [6.2.0-0.rc8.56]
 - Linux v6.2.0-0.rc8
