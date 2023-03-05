@@ -1,4 +1,4 @@
-From 23aa5e79237a32749fae59f6c57b72b91b3f7d8c Mon Sep 17 00:00:00 2001
+From ae9e0b7d5721f999d8d3534e24523411cf0d1d3b Mon Sep 17 00:00:00 2001
 From: Tsuchiya Yuto <kitakar@gmail.com>
 Date: Sun, 18 Oct 2020 16:42:44 +0900
 Subject: [PATCH] (surface3-oemb) add DMI matches for Surface 3 with broken DMI
@@ -97,9 +97,9 @@ index 6beb00858c33..d82d77387a0a 100644
  };
  
 -- 
-2.39.1
+2.39.2
 
-From 433c150583548550a4f7d70555327ad4841439f5 Mon Sep 17 00:00:00 2001
+From 7cfd22611354b70280138ae27b2a955d7ee75aee Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jonas=20Dre=C3=9Fler?= <verdre@v0yd.nl>
 Date: Tue, 3 Nov 2020 13:28:04 +0100
 Subject: [PATCH] mwifiex: Add quirk resetting the PCI bridge on MS Surface
@@ -264,9 +264,9 @@ index d6ff964aec5b..5d30ae39d65e 100644
  void mwifiex_initialize_quirks(struct pcie_service_card *card);
  int mwifiex_pcie_reset_d3cold_quirk(struct pci_dev *pdev);
 -- 
-2.39.1
+2.39.2
 
-From 9213544f2bdb8da9f418603c0dec038b5f60827e Mon Sep 17 00:00:00 2001
+From 569a9756e62e10401eeebaa26e077bf3841d1aba Mon Sep 17 00:00:00 2001
 From: Tsuchiya Yuto <kitakar@gmail.com>
 Date: Sun, 4 Oct 2020 00:11:49 +0900
 Subject: [PATCH] mwifiex: pcie: disable bridge_d3 for Surface gen4+
@@ -419,9 +419,9 @@ index 5d30ae39d65e..c14eb56eb911 100644
  void mwifiex_initialize_quirks(struct pcie_service_card *card);
  int mwifiex_pcie_reset_d3cold_quirk(struct pci_dev *pdev);
 -- 
-2.39.1
+2.39.2
 
-From 432e8b738082459dff82013f75145c9aa31ce4c9 Mon Sep 17 00:00:00 2001
+From a0fab0bfbfa3ba12ffe604dd6d3efa5354f6525e Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jonas=20Dre=C3=9Fler?= <verdre@v0yd.nl>
 Date: Thu, 25 Mar 2021 11:33:02 +0100
 Subject: [PATCH] Bluetooth: btusb: Lower passive lescan interval on Marvell
@@ -457,10 +457,10 @@ Patchset: mwifiex
  1 file changed, 15 insertions(+)
 
 diff --git a/drivers/bluetooth/btusb.c b/drivers/bluetooth/btusb.c
-index 6beafd62d722..633f77fb4f96 100644
+index 2ad4efdd9e40..a1863815f04b 100644
 --- a/drivers/bluetooth/btusb.c
 +++ b/drivers/bluetooth/btusb.c
-@@ -63,6 +63,7 @@ static struct usb_driver btusb_driver;
+@@ -64,6 +64,7 @@ static struct usb_driver btusb_driver;
  #define BTUSB_INTEL_BROKEN_SHUTDOWN_LED	BIT(24)
  #define BTUSB_INTEL_BROKEN_INITIAL_NCMD BIT(25)
  #define BTUSB_INTEL_NO_WBS_SUPPORT	BIT(26)
@@ -468,7 +468,7 @@ index 6beafd62d722..633f77fb4f96 100644
  
  static const struct usb_device_id btusb_table[] = {
  	/* Generic Bluetooth USB device */
-@@ -382,6 +383,7 @@ static const struct usb_device_id blacklist_table[] = {
+@@ -467,6 +468,7 @@ static const struct usb_device_id blacklist_table[] = {
  	{ USB_DEVICE(0x1286, 0x2044), .driver_info = BTUSB_MARVELL },
  	{ USB_DEVICE(0x1286, 0x2046), .driver_info = BTUSB_MARVELL },
  	{ USB_DEVICE(0x1286, 0x204e), .driver_info = BTUSB_MARVELL },
@@ -476,7 +476,7 @@ index 6beafd62d722..633f77fb4f96 100644
  
  	/* Intel Bluetooth devices */
  	{ USB_DEVICE(0x8087, 0x0025), .driver_info = BTUSB_INTEL_COMBINED },
-@@ -3862,6 +3864,19 @@ static int btusb_probe(struct usb_interface *intf,
+@@ -4032,6 +4034,19 @@ static int btusb_probe(struct usb_interface *intf,
  	if (id->driver_info & BTUSB_MARVELL)
  		hdev->set_bdaddr = btusb_set_bdaddr_marvell;
  
@@ -497,9 +497,9 @@ index 6beafd62d722..633f77fb4f96 100644
  	    (id->driver_info & BTUSB_MEDIATEK)) {
  		hdev->setup = btusb_mtk_setup;
 -- 
-2.39.1
+2.39.2
 
-From 06a33cf28d8fcd107f431bb6f6574cf7500156ff Mon Sep 17 00:00:00 2001
+From 2193398be07a2c5cf4105e0d394c32004e5058ff Mon Sep 17 00:00:00 2001
 From: Maximilian Luz <luzmaximilian@gmail.com>
 Date: Sat, 27 Feb 2021 00:45:52 +0100
 Subject: [PATCH] ath10k: Add module parameters to override board files
@@ -618,9 +618,9 @@ index 5eb131ab916f..67f074a126d1 100644
  	ret = firmware_request_nowarn(&fw, filename, ar->dev);
  	ath10k_dbg(ar, ATH10K_DBG_BOOT, "boot fw request '%s': %d\n",
 -- 
-2.39.1
+2.39.2
 
-From c478dcf8c11deacc16b2d9a80c26af3c22ccdd3e Mon Sep 17 00:00:00 2001
+From fc13b9c8ed163b6939fda886193f39195fd96d29 Mon Sep 17 00:00:00 2001
 From: Dorian Stoll <dorian.stoll@tmsp.io>
 Date: Thu, 30 Jul 2020 13:21:53 +0200
 Subject: [PATCH] misc: mei: Add missing IPTS device IDs
@@ -656,9 +656,9 @@ index 5bf0d50d55a0..c13864512229 100644
  
  	{MEI_PCI_DEVICE(MEI_DEV_ID_TGP_LP, MEI_ME_PCH15_CFG)},
 -- 
-2.39.1
+2.39.2
 
-From 25bccbb65a0f464a6da0913f3485270e2c840d76 Mon Sep 17 00:00:00 2001
+From d8350fa355f7bc23530888a4053d66f94ec9ba85 Mon Sep 17 00:00:00 2001
 From: Liban Hannan <liban.p@gmail.com>
 Date: Tue, 12 Apr 2022 23:31:12 +0100
 Subject: [PATCH] iommu: ipts: use IOMMU passthrough mode for IPTS
@@ -680,7 +680,7 @@ Patchset: ipts
  1 file changed, 24 insertions(+)
 
 diff --git a/drivers/iommu/intel/iommu.c b/drivers/iommu/intel/iommu.c
-index 644ca49e8cf8..408c321b929a 100644
+index 59df7e42fd53..af91ed003861 100644
 --- a/drivers/iommu/intel/iommu.c
 +++ b/drivers/iommu/intel/iommu.c
 @@ -37,6 +37,8 @@
@@ -692,7 +692,7 @@ index 644ca49e8cf8..408c321b929a 100644
  #define IS_AZALIA(pdev) ((pdev)->vendor == 0x8086 && (pdev)->device == 0x3a3e)
  
  #define IOAPIC_RANGE_START	(0xfee00000)
-@@ -286,12 +288,14 @@ int intel_iommu_enabled = 0;
+@@ -287,12 +289,14 @@ int intel_iommu_enabled = 0;
  EXPORT_SYMBOL_GPL(intel_iommu_enabled);
  
  static int dmar_map_gfx = 1;
@@ -707,7 +707,7 @@ index 644ca49e8cf8..408c321b929a 100644
  
  const struct iommu_ops intel_iommu_ops;
  
-@@ -2630,6 +2634,9 @@ static int device_def_domain_type(struct device *dev)
+@@ -2584,6 +2588,9 @@ static int device_def_domain_type(struct device *dev)
  
  		if ((iommu_identity_mapping & IDENTMAP_GFX) && IS_GFX_DEVICE(pdev))
  			return IOMMU_DOMAIN_IDENTITY;
@@ -717,7 +717,7 @@ index 644ca49e8cf8..408c321b929a 100644
  	}
  
  	return 0;
-@@ -3019,6 +3026,9 @@ static int __init init_dmars(void)
+@@ -2973,6 +2980,9 @@ static int __init init_dmars(void)
  	if (!dmar_map_gfx)
  		iommu_identity_mapping |= IDENTMAP_GFX;
  
@@ -727,7 +727,7 @@ index 644ca49e8cf8..408c321b929a 100644
  	check_tylersburg_isoch();
  
  	ret = si_domain_init(hw_pass_through);
-@@ -4774,6 +4784,17 @@ static void quirk_iommu_igfx(struct pci_dev *dev)
+@@ -4799,6 +4809,17 @@ static void quirk_iommu_igfx(struct pci_dev *dev)
  	dmar_map_gfx = 0;
  }
  
@@ -745,7 +745,7 @@ index 644ca49e8cf8..408c321b929a 100644
  /* G4x/GM45 integrated gfx dmar support is totally busted. */
  DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x2a40, quirk_iommu_igfx);
  DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x2e00, quirk_iommu_igfx);
-@@ -4809,6 +4830,9 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x1632, quirk_iommu_igfx);
+@@ -4834,6 +4855,9 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x1632, quirk_iommu_igfx);
  DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x163A, quirk_iommu_igfx);
  DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x163D, quirk_iommu_igfx);
  
@@ -756,9 +756,9 @@ index 644ca49e8cf8..408c321b929a 100644
  {
  	if (risky_device(dev))
 -- 
-2.39.1
+2.39.2
 
-From f7a9a34b94d87014af3d459a7abe67189c02348c Mon Sep 17 00:00:00 2001
+From de30c54d4a20ac27a60617ce66af1e4d58f93496 Mon Sep 17 00:00:00 2001
 From: Dorian Stoll <dorian.stoll@tmsp.io>
 Date: Sun, 11 Dec 2022 12:00:59 +0100
 Subject: [PATCH] hid: Add support for Intel Precise Touch and Stylus
@@ -817,10 +817,10 @@ Patchset: ipts
  create mode 100644 drivers/hid/ipts/thread.h
 
 diff --git a/drivers/hid/Kconfig b/drivers/hid/Kconfig
-index 185a077d59cd..1523ccdf73b5 100644
+index e2a5d30c8895..a4af77fcca20 100644
 --- a/drivers/hid/Kconfig
 +++ b/drivers/hid/Kconfig
-@@ -1290,4 +1290,6 @@ source "drivers/hid/amd-sfh-hid/Kconfig"
+@@ -1291,4 +1291,6 @@ source "drivers/hid/amd-sfh-hid/Kconfig"
  
  source "drivers/hid/surface-hid/Kconfig"
  
@@ -3606,9 +3606,9 @@ index 000000000000..a314843599fc
 +
 +#endif /* IPTS_THREAD_H */
 -- 
-2.39.1
+2.39.2
 
-From 9b5e6f3c5ec3c5d1020d280f06cb21998a75dd8c Mon Sep 17 00:00:00 2001
+From c603b366ba39f7b32e0890ad34de351615da882f Mon Sep 17 00:00:00 2001
 From: Dorian Stoll <dorian.stoll@tmsp.io>
 Date: Sun, 11 Dec 2022 12:03:38 +0100
 Subject: [PATCH] iommu: intel: Disable source id verification for ITHC
@@ -3620,10 +3620,10 @@ Patchset: ithc
  1 file changed, 16 insertions(+)
 
 diff --git a/drivers/iommu/intel/irq_remapping.c b/drivers/iommu/intel/irq_remapping.c
-index 5962bb5027d0..86fa129d10d4 100644
+index f58f5f57af78..59a6a458d9bf 100644
 --- a/drivers/iommu/intel/irq_remapping.c
 +++ b/drivers/iommu/intel/irq_remapping.c
-@@ -396,6 +396,22 @@ static int set_msi_sid(struct irte *irte, struct pci_dev *dev)
+@@ -394,6 +394,22 @@ static int set_msi_sid(struct irte *irte, struct pci_dev *dev)
  	data.busmatch_count = 0;
  	pci_for_each_dma_alias(dev, set_msi_sid_cb, &data);
  
@@ -3647,9 +3647,9 @@ index 5962bb5027d0..86fa129d10d4 100644
  	 * DMA alias provides us with a PCI device and alias.  The only case
  	 * where the it will return an alias on a different bus than the
 -- 
-2.39.1
+2.39.2
 
-From a0f2ca87dfa5ef12934a2d58f6cdf5ec5439d8a8 Mon Sep 17 00:00:00 2001
+From dea941c51ab889e60a3204831194dddc1641366a Mon Sep 17 00:00:00 2001
 From: Dorian Stoll <dorian.stoll@tmsp.io>
 Date: Sun, 11 Dec 2022 12:10:54 +0100
 Subject: [PATCH] hid: Add support for Intel Touch Host Controller
@@ -3682,10 +3682,10 @@ Patchset: ithc
  create mode 100644 drivers/hid/ithc/ithc.h
 
 diff --git a/drivers/hid/Kconfig b/drivers/hid/Kconfig
-index 1523ccdf73b5..b7030071ac0c 100644
+index a4af77fcca20..4ece2a06949b 100644
 --- a/drivers/hid/Kconfig
 +++ b/drivers/hid/Kconfig
-@@ -1292,4 +1292,6 @@ source "drivers/hid/surface-hid/Kconfig"
+@@ -1293,4 +1293,6 @@ source "drivers/hid/surface-hid/Kconfig"
  
  source "drivers/hid/ipts/Kconfig"
  
@@ -5039,9 +5039,9 @@ index 000000000000..6a9b0d480bc1
 +void ithc_log_regs(struct ithc *ithc);
 +
 -- 
-2.39.1
+2.39.2
 
-From 5c5fa1a9414a4b1ae16bc7af5c0940b53257237e Mon Sep 17 00:00:00 2001
+From 215f857aba54ff78423f52390bb3451d6e1eecfd Mon Sep 17 00:00:00 2001
 From: Maximilian Luz <luzmaximilian@gmail.com>
 Date: Fri, 2 Dec 2022 23:33:20 +0100
 Subject: [PATCH] platform/surface: aggregator: Improve documentation and
@@ -5330,9 +5330,9 @@ index 45501b6e54e8..5c4ae1a26183 100644
   * Known SSH/EC target categories.
   *
 -- 
-2.39.1
+2.39.2
 
-From 13cf1fcdfafe787ff673f96e3fa8ce196c5c466e Mon Sep 17 00:00:00 2001
+From 47975eceedbe62be9440a6698ed6d2bb44c81a75 Mon Sep 17 00:00:00 2001
 From: Maximilian Luz <luzmaximilian@gmail.com>
 Date: Fri, 2 Dec 2022 23:33:21 +0100
 Subject: [PATCH] platform/surface: aggregator: Add target and source IDs to
@@ -5527,9 +5527,9 @@ index 2a2c17771d01..55cc61bba1da 100644
  		ssam_show_generic_u8_field(__entry->cid),
  		ssam_show_generic_u8_field(__entry->iid),
 -- 
-2.39.1
+2.39.2
 
-From 7558c159d840b408065804b66d740ff52fd3825c Mon Sep 17 00:00:00 2001
+From f2f21b0270aa4587685c32fc68712502f8e95552 Mon Sep 17 00:00:00 2001
 From: Maximilian Luz <luzmaximilian@gmail.com>
 Date: Fri, 2 Dec 2022 23:33:22 +0100
 Subject: [PATCH] platform/surface: aggregator_hub: Use target-ID enum instead
@@ -5570,9 +5570,9 @@ index 43061514be38..62f27cdb6ca8 100644
  	.instance_id     = 0x00,
  });
 -- 
-2.39.1
+2.39.2
 
-From b57521c09754e523fff0b1fce8a351d061380377 Mon Sep 17 00:00:00 2001
+From 75ab07418da36ef799eebe7f3e028743461056d5 Mon Sep 17 00:00:00 2001
 From: Maximilian Luz <luzmaximilian@gmail.com>
 Date: Fri, 2 Dec 2022 23:33:23 +0100
 Subject: [PATCH] platform/surface: aggregator_tabletsw: Use target-ID enum
@@ -5622,9 +5622,9 @@ index 27d95a6a7851..bd8cd453c393 100644
  	.instance_id     = 0x00,
  });
 -- 
-2.39.1
+2.39.2
 
-From ac38b3ca24a7a17ec55fc364c992c06cdad8011c Mon Sep 17 00:00:00 2001
+From 2c8a24e5ab3882d65ec6ec27cc54b6aff1bd3df5 Mon Sep 17 00:00:00 2001
 From: Maximilian Luz <luzmaximilian@gmail.com>
 Date: Fri, 2 Dec 2022 23:33:24 +0100
 Subject: [PATCH] platform/surface: dtx: Use target-ID enum instead of
@@ -5720,9 +5720,9 @@ index ed36944467f9..0de76a784a35 100644
  	.instance_id     = 0x00,
  });
 -- 
-2.39.1
+2.39.2
 
-From a3658f509048591fcce462c4fa7a69030f5f2a2f Mon Sep 17 00:00:00 2001
+From 8ae9ce5928e75c73191007c0e2ee645c6c474780 Mon Sep 17 00:00:00 2001
 From: Maximilian Luz <luzmaximilian@gmail.com>
 Date: Fri, 2 Dec 2022 23:33:26 +0100
 Subject: [PATCH] platform/surface: aggregator: Enforce use of target-ID enum
@@ -5956,9 +5956,9 @@ index 46c45d1b6368..4da20b7a0ee5 100644
  /*
   * enum ssam_device_flags - Flags for SSAM client devices.
 -- 
-2.39.1
+2.39.2
 
-From ce70c31c9612629949d933d5ba4086309a7b940f Mon Sep 17 00:00:00 2001
+From 384841d531428ea74bc2da6fcf9945bd4f6fb02b Mon Sep 17 00:00:00 2001
 From: Maximilian Luz <luzmaximilian@gmail.com>
 Date: Fri, 2 Dec 2022 23:33:27 +0100
 Subject: [PATCH] platform/surface: aggregator_registry: Fix target-ID of
@@ -6011,9 +6011,9 @@ index 023f126121d7..296f72d52e6a 100644
  };
  
 -- 
-2.39.1
+2.39.2
 
-From d48e58e62f0cf34197267f1905b7f98259ca5a6e Mon Sep 17 00:00:00 2001
+From 128c67336235ba8e1c492c057333a51d7e5741cb Mon Sep 17 00:00:00 2001
 From: Maximilian Luz <luzmaximilian@gmail.com>
 Date: Tue, 20 Dec 2022 18:56:08 +0100
 Subject: [PATCH] platform/surface: aggregator: Rename top-level request
@@ -6558,9 +6558,9 @@ index 4da20b7a0ee5..1545e5567b15 100644
   */
  #define SSAM_DEFINE_SYNC_REQUEST_CL_WR(name, atype, rtype, spec...)		\
 -- 
-2.39.1
+2.39.2
 
-From 60580e724335386ff17b69a9aaf4ef33866ce04f Mon Sep 17 00:00:00 2001
+From 4a16f31df60b8f6fb5a75adbc3659d30a1df7fd7 Mon Sep 17 00:00:00 2001
 From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 Date: Wed, 18 Jan 2023 11:38:23 +0200
 Subject: [PATCH] platform/surface: Switch to use acpi_evaluate_dsm_typed()
@@ -6614,9 +6614,401 @@ index f004a2495201..7b6d887dccdb 100644
  
  static irqreturn_t shps_handle_irq(int irq, void *data)
 -- 
-2.39.1
+2.39.2
 
-From 38dfeaed0a26f4fffa70427d5293df0d9a98df83 Mon Sep 17 00:00:00 2001
+From e5ac20bdef58396ad229b3cdf8a4413a7197d1c5 Mon Sep 17 00:00:00 2001
+From: Maximilian Luz <luzmaximilian@gmail.com>
+Date: Sun, 19 Feb 2023 23:33:43 +0100
+Subject: [PATCH] platform/surface: aggregator_tabletsw: Add support for
+ Type-Cover posture source
+
+The POS-subsystem can provide different sources for querying device
+posture states and receiving posture-change events. We use this
+subsystem to implement tablet-mode events on newer Surface devices.
+
+Currently, however, the driver only implements support for the Surface
+Laptop Studio, with source ID 0. This has been hard-coded. Therefore,
+make the driver more flexible to support more source types and also
+implement support for the Type-Cover source type found on the Surface
+Pro 9.
+
+Signed-off-by: Maximilian Luz <luzmaximilian@gmail.com>
+Patchset: surface-sam
+---
+ .../surface/surface_aggregator_tabletsw.c     | 180 ++++++++++++++----
+ 1 file changed, 141 insertions(+), 39 deletions(-)
+
+diff --git a/drivers/platform/surface/surface_aggregator_tabletsw.c b/drivers/platform/surface/surface_aggregator_tabletsw.c
+index 9fed800c7cc0..8f52b62d1c19 100644
+--- a/drivers/platform/surface/surface_aggregator_tabletsw.c
++++ b/drivers/platform/surface/surface_aggregator_tabletsw.c
+@@ -20,16 +20,23 @@
+ 
+ struct ssam_tablet_sw;
+ 
++struct ssam_tablet_sw_state {
++	u32 source;
++	u32 state;
++};
++
+ struct ssam_tablet_sw_ops {
+-	int (*get_state)(struct ssam_tablet_sw *sw, u32 *state);
+-	const char *(*state_name)(struct ssam_tablet_sw *sw, u32 state);
+-	bool (*state_is_tablet_mode)(struct ssam_tablet_sw *sw, u32 state);
++	int (*get_state)(struct ssam_tablet_sw *sw, struct ssam_tablet_sw_state *state);
++	const char *(*state_name)(struct ssam_tablet_sw *sw,
++				  const struct ssam_tablet_sw_state *state);
++	bool (*state_is_tablet_mode)(struct ssam_tablet_sw *sw,
++				     const struct ssam_tablet_sw_state *state);
+ };
+ 
+ struct ssam_tablet_sw {
+ 	struct ssam_device *sdev;
+ 
+-	u32 state;
++	struct ssam_tablet_sw_state state;
+ 	struct work_struct update_work;
+ 	struct input_dev *mode_switch;
+ 
+@@ -45,9 +52,11 @@ struct ssam_tablet_sw_desc {
+ 
+ 	struct {
+ 		u32 (*notify)(struct ssam_event_notifier *nf, const struct ssam_event *event);
+-		int (*get_state)(struct ssam_tablet_sw *sw, u32 *state);
+-		const char *(*state_name)(struct ssam_tablet_sw *sw, u32 state);
+-		bool (*state_is_tablet_mode)(struct ssam_tablet_sw *sw, u32 state);
++		int (*get_state)(struct ssam_tablet_sw *sw, struct ssam_tablet_sw_state *state);
++		const char *(*state_name)(struct ssam_tablet_sw *sw,
++					  const struct ssam_tablet_sw_state *state);
++		bool (*state_is_tablet_mode)(struct ssam_tablet_sw *sw,
++					     const struct ssam_tablet_sw_state *state);
+ 	} ops;
+ 
+ 	struct {
+@@ -61,7 +70,7 @@ struct ssam_tablet_sw_desc {
+ static ssize_t state_show(struct device *dev, struct device_attribute *attr, char *buf)
+ {
+ 	struct ssam_tablet_sw *sw = dev_get_drvdata(dev);
+-	const char *state = sw->ops.state_name(sw, sw->state);
++	const char *state = sw->ops.state_name(sw, &sw->state);
+ 
+ 	return sysfs_emit(buf, "%s\n", state);
+ }
+@@ -79,19 +88,19 @@ static const struct attribute_group ssam_tablet_sw_group = {
+ static void ssam_tablet_sw_update_workfn(struct work_struct *work)
+ {
+ 	struct ssam_tablet_sw *sw = container_of(work, struct ssam_tablet_sw, update_work);
++	struct ssam_tablet_sw_state state;
+ 	int tablet, status;
+-	u32 state;
+ 
+ 	status = sw->ops.get_state(sw, &state);
+ 	if (status)
+ 		return;
+ 
+-	if (sw->state == state)
++	if (sw->state.source == state.source && sw->state.state == state.state)
+ 		return;
+ 	sw->state = state;
+ 
+ 	/* Send SW_TABLET_MODE event. */
+-	tablet = sw->ops.state_is_tablet_mode(sw, state);
++	tablet = sw->ops.state_is_tablet_mode(sw, &state);
+ 	input_report_switch(sw->mode_switch, SW_TABLET_MODE, tablet);
+ 	input_sync(sw->mode_switch);
+ }
+@@ -146,7 +155,7 @@ static int ssam_tablet_sw_probe(struct ssam_device *sdev)
+ 	sw->mode_switch->id.bustype = BUS_HOST;
+ 	sw->mode_switch->dev.parent = &sdev->dev;
+ 
+-	tablet = sw->ops.state_is_tablet_mode(sw, sw->state);
++	tablet = sw->ops.state_is_tablet_mode(sw, &sw->state);
+ 	input_set_capability(sw->mode_switch, EV_SW, SW_TABLET_MODE);
+ 	input_report_switch(sw->mode_switch, SW_TABLET_MODE, tablet);
+ 
+@@ -203,9 +212,10 @@ enum ssam_kip_cover_state {
+ 	SSAM_KIP_COVER_STATE_FOLDED_BACK   = 0x05,
+ };
+ 
+-static const char *ssam_kip_cover_state_name(struct ssam_tablet_sw *sw, u32 state)
++static const char *ssam_kip_cover_state_name(struct ssam_tablet_sw *sw,
++					     const struct ssam_tablet_sw_state *state)
+ {
+-	switch (state) {
++	switch (state->state) {
+ 	case SSAM_KIP_COVER_STATE_DISCONNECTED:
+ 		return "disconnected";
+ 
+@@ -222,14 +232,15 @@ static const char *ssam_kip_cover_state_name(struct ssam_tablet_sw *sw, u32 stat
+ 		return "folded-back";
+ 
+ 	default:
+-		dev_warn(&sw->sdev->dev, "unknown KIP cover state: %u\n", state);
++		dev_warn(&sw->sdev->dev, "unknown KIP cover state: %u\n", state->state);
+ 		return "<unknown>";
+ 	}
+ }
+ 
+-static bool ssam_kip_cover_state_is_tablet_mode(struct ssam_tablet_sw *sw, u32 state)
++static bool ssam_kip_cover_state_is_tablet_mode(struct ssam_tablet_sw *sw,
++						const struct ssam_tablet_sw_state *state)
+ {
+-	switch (state) {
++	switch (state->state) {
+ 	case SSAM_KIP_COVER_STATE_DISCONNECTED:
+ 	case SSAM_KIP_COVER_STATE_FOLDED_CANVAS:
+ 	case SSAM_KIP_COVER_STATE_FOLDED_BACK:
+@@ -240,7 +251,7 @@ static bool ssam_kip_cover_state_is_tablet_mode(struct ssam_tablet_sw *sw, u32 s
+ 		return false;
+ 
+ 	default:
+-		dev_warn(&sw->sdev->dev, "unknown KIP cover state: %d\n", sw->state);
++		dev_warn(&sw->sdev->dev, "unknown KIP cover state: %d\n", state->state);
+ 		return true;
+ 	}
+ }
+@@ -252,7 +263,7 @@ SSAM_DEFINE_SYNC_REQUEST_R(__ssam_kip_get_cover_state, u8, {
+ 	.instance_id     = 0x00,
+ });
+ 
+-static int ssam_kip_get_cover_state(struct ssam_tablet_sw *sw, u32 *state)
++static int ssam_kip_get_cover_state(struct ssam_tablet_sw *sw, struct ssam_tablet_sw_state *state)
+ {
+ 	int status;
+ 	u8 raw;
+@@ -263,7 +274,8 @@ static int ssam_kip_get_cover_state(struct ssam_tablet_sw *sw, u32 *state)
+ 		return status;
+ 	}
+ 
+-	*state = raw;
++	state->source = 0;	/* Unused for KIP switch. */
++	state->state = raw;
+ 	return 0;
+ }
+ 
+@@ -312,11 +324,24 @@ MODULE_PARM_DESC(tablet_mode_in_slate_state, "Enable tablet mode in slate device
+ #define SSAM_EVENT_POS_CID_POSTURE_CHANGED	0x03
+ #define SSAM_POS_MAX_SOURCES			4
+ 
+-enum ssam_pos_state {
+-	SSAM_POS_POSTURE_LID_CLOSED = 0x00,
+-	SSAM_POS_POSTURE_LAPTOP     = 0x01,
+-	SSAM_POS_POSTURE_SLATE      = 0x02,
+-	SSAM_POS_POSTURE_TABLET     = 0x03,
++enum ssam_pos_source_id {
++	SSAM_POS_SOURCE_COVER = 0x00,
++	SSAM_POS_SOURCE_SLS   = 0x03,
++};
++
++enum ssam_pos_state_cover {
++	SSAM_POS_COVER_DISCONNECTED  = 0x01,
++	SSAM_POS_COVER_CLOSED        = 0x02,
++	SSAM_POS_COVER_LAPTOP        = 0x03,
++	SSAM_POS_COVER_FOLDED_CANVAS = 0x04,
++	SSAM_POS_COVER_FOLDED_BACK   = 0x05,
++};
++
++enum ssam_pos_state_sls {
++	SSAM_POS_SLS_LID_CLOSED = 0x00,
++	SSAM_POS_SLS_LAPTOP     = 0x01,
++	SSAM_POS_SLS_SLATE      = 0x02,
++	SSAM_POS_SLS_TABLET     = 0x03,
+ };
+ 
+ struct ssam_sources_list {
+@@ -324,42 +349,116 @@ struct ssam_sources_list {
+ 	__le32 id[SSAM_POS_MAX_SOURCES];
+ } __packed;
+ 
+-static const char *ssam_pos_state_name(struct ssam_tablet_sw *sw, u32 state)
++static const char *ssam_pos_state_name_cover(struct ssam_tablet_sw *sw, u32 state)
++{
++	switch (state) {
++	case SSAM_POS_COVER_DISCONNECTED:
++		return "disconnected";
++
++	case SSAM_POS_COVER_CLOSED:
++		return "closed";
++
++	case SSAM_POS_COVER_LAPTOP:
++		return "laptop";
++
++	case SSAM_POS_COVER_FOLDED_CANVAS:
++		return "folded-canvas";
++
++	case SSAM_POS_COVER_FOLDED_BACK:
++		return "folded-back";
++
++	default:
++		dev_warn(&sw->sdev->dev, "unknown device posture for type-cover: %u\n", state);
++		return "<unknown>";
++	}
++}
++
++static const char *ssam_pos_state_name_sls(struct ssam_tablet_sw *sw, u32 state)
+ {
+ 	switch (state) {
+-	case SSAM_POS_POSTURE_LID_CLOSED:
++	case SSAM_POS_SLS_LID_CLOSED:
+ 		return "closed";
+ 
+-	case SSAM_POS_POSTURE_LAPTOP:
++	case SSAM_POS_SLS_LAPTOP:
+ 		return "laptop";
+ 
+-	case SSAM_POS_POSTURE_SLATE:
++	case SSAM_POS_SLS_SLATE:
+ 		return "slate";
+ 
+-	case SSAM_POS_POSTURE_TABLET:
++	case SSAM_POS_SLS_TABLET:
+ 		return "tablet";
+ 
+ 	default:
+-		dev_warn(&sw->sdev->dev, "unknown device posture: %u\n", state);
++		dev_warn(&sw->sdev->dev, "unknown device posture for SLS: %u\n", state);
+ 		return "<unknown>";
+ 	}
+ }
+ 
+-static bool ssam_pos_state_is_tablet_mode(struct ssam_tablet_sw *sw, u32 state)
++static const char *ssam_pos_state_name(struct ssam_tablet_sw *sw,
++				       const struct ssam_tablet_sw_state *state)
++{
++	switch (state->source) {
++	case SSAM_POS_SOURCE_COVER:
++		return ssam_pos_state_name_cover(sw, state->state);
++
++	case SSAM_POS_SOURCE_SLS:
++		return ssam_pos_state_name_sls(sw, state->state);
++
++	default:
++		dev_warn(&sw->sdev->dev, "unknown device posture source: %u\n", state->source);
++		return "<unknown>";
++	}
++}
++
++static bool ssam_pos_state_is_tablet_mode_cover(struct ssam_tablet_sw *sw, u32 state)
+ {
+ 	switch (state) {
+-	case SSAM_POS_POSTURE_LAPTOP:
+-	case SSAM_POS_POSTURE_LID_CLOSED:
++	case SSAM_POS_COVER_DISCONNECTED:
++	case SSAM_POS_COVER_FOLDED_CANVAS:
++	case SSAM_POS_COVER_FOLDED_BACK:
++		return true;
++
++	case SSAM_POS_COVER_CLOSED:
++	case SSAM_POS_COVER_LAPTOP:
+ 		return false;
+ 
+-	case SSAM_POS_POSTURE_SLATE:
++	default:
++		dev_warn(&sw->sdev->dev, "unknown device posture for type-cover: %u\n", state);
++		return true;
++	}
++}
++
++static bool ssam_pos_state_is_tablet_mode_sls(struct ssam_tablet_sw *sw, u32 state)
++{
++	switch (state) {
++	case SSAM_POS_SLS_LAPTOP:
++	case SSAM_POS_SLS_LID_CLOSED:
++		return false;
++
++	case SSAM_POS_SLS_SLATE:
+ 		return tablet_mode_in_slate_state;
+ 
+-	case SSAM_POS_POSTURE_TABLET:
++	case SSAM_POS_SLS_TABLET:
+ 		return true;
+ 
+ 	default:
+-		dev_warn(&sw->sdev->dev, "unknown device posture: %u\n", state);
++		dev_warn(&sw->sdev->dev, "unknown device posture for SLS: %u\n", state);
++		return true;
++	}
++}
++
++static bool ssam_pos_state_is_tablet_mode(struct ssam_tablet_sw *sw,
++					  const struct ssam_tablet_sw_state *state)
++{
++	switch (state->source) {
++	case SSAM_POS_SOURCE_COVER:
++		return ssam_pos_state_is_tablet_mode_cover(sw, state->state);
++
++	case SSAM_POS_SOURCE_SLS:
++		return ssam_pos_state_is_tablet_mode_sls(sw, state->state);
++
++	default:
++		dev_warn(&sw->sdev->dev, "unknown device posture source: %u\n", state->source);
+ 		return true;
+ 	}
+ }
+@@ -450,9 +549,10 @@ static int ssam_pos_get_posture_for_source(struct ssam_tablet_sw *sw, u32 source
+ 	return 0;
+ }
+ 
+-static int ssam_pos_get_posture(struct ssam_tablet_sw *sw, u32 *state)
++static int ssam_pos_get_posture(struct ssam_tablet_sw *sw, struct ssam_tablet_sw_state *state)
+ {
+ 	u32 source_id;
++	u32 source_state;
+ 	int status;
+ 
+ 	status = ssam_pos_get_source(sw, &source_id);
+@@ -461,13 +561,15 @@ static int ssam_pos_get_posture(struct ssam_tablet_sw *sw, u32 *state)
+ 		return status;
+ 	}
+ 
+-	status = ssam_pos_get_posture_for_source(sw, source_id, state);
++	status = ssam_pos_get_posture_for_source(sw, source_id, &source_state);
+ 	if (status) {
+ 		dev_err(&sw->sdev->dev, "failed to get posture value for source %u: %d\n",
+ 			source_id, status);
+ 		return status;
+ 	}
+ 
++	state->source = source_id;
++	state->state = source_state;
+ 	return 0;
+ }
+ 
+-- 
+2.39.2
+
+From e6b1c2c4ebb3deec8e4d5f3c07df00f1e93dec2b Mon Sep 17 00:00:00 2001
+From: Maximilian Luz <luzmaximilian@gmail.com>
+Date: Sun, 19 Feb 2023 23:41:18 +0100
+Subject: [PATCH] platform/surface: aggregator_registry: Add support for
+ tablet-mode switch on Surface Pro 9
+
+Add support for the POS-subsystem tablet-mode switch used on the Surface
+Pro 9.
+
+Signed-off-by: Maximilian Luz <luzmaximilian@gmail.com>
+Patchset: surface-sam
+---
+ drivers/platform/surface/surface_aggregator_registry.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/platform/surface/surface_aggregator_registry.c b/drivers/platform/surface/surface_aggregator_registry.c
+index 296f72d52e6a..0fe5be539652 100644
+--- a/drivers/platform/surface/surface_aggregator_registry.c
++++ b/drivers/platform/surface/surface_aggregator_registry.c
+@@ -305,7 +305,7 @@ static const struct software_node *ssam_node_group_sp9[] = {
+ 	&ssam_node_bat_ac,
+ 	&ssam_node_bat_main,
+ 	&ssam_node_tmp_pprof,
+-	/* TODO: Tablet mode switch (via POS subsystem) */
++	&ssam_node_pos_tablet_switch,
+ 	&ssam_node_hid_kip_keyboard,
+ 	&ssam_node_hid_kip_penstash,
+ 	&ssam_node_hid_kip_touchpad,
+-- 
+2.39.2
+
+From 3773f7939b6478a201d1df2b7258a1b456cbed28 Mon Sep 17 00:00:00 2001
 From: Maximilian Luz <luzmaximilian@gmail.com>
 Date: Sat, 25 Jul 2020 17:19:53 +0200
 Subject: [PATCH] i2c: acpi: Implement RawBytes read access
@@ -6726,9 +7118,9 @@ index 4dd777cc0c89..b2338618163a 100644
  		dev_warn(&adapter->dev, "protocol 0x%02x not supported for client 0x%02x\n",
  			 accessor_type, client->addr);
 -- 
-2.39.1
+2.39.2
 
-From e24522a4e868a4c66f428692b49397e76e826936 Mon Sep 17 00:00:00 2001
+From 45a27c8394127b6c02be2f439edf547e55bf43c3 Mon Sep 17 00:00:00 2001
 From: Maximilian Luz <luzmaximilian@gmail.com>
 Date: Sat, 13 Feb 2021 16:41:18 +0100
 Subject: [PATCH] platform/surface: Add driver for Surface Book 1 dGPU switch
@@ -6949,9 +7341,9 @@ index 000000000000..8b816ed8f35c
 +MODULE_DESCRIPTION("Discrete GPU Power-Switch for Surface Book 1");
 +MODULE_LICENSE("GPL");
 -- 
-2.39.1
+2.39.2
 
-From befa0b86802aa90fcc2110ce98e15541aba3ecd0 Mon Sep 17 00:00:00 2001
+From 271ae922fcaf743046846175e56f71b843c14096 Mon Sep 17 00:00:00 2001
 From: Sachi King <nakato@nakato.io>
 Date: Tue, 5 Oct 2021 00:05:09 +1100
 Subject: [PATCH] Input: soc_button_array - support AMD variant Surface devices
@@ -7026,9 +7418,9 @@ index 09489380afda..0f02411a60f1 100644
  
  /*
 -- 
-2.39.1
+2.39.2
 
-From 27cc4fc20daad7b4eed075f4de363c9e0b9e8b7b Mon Sep 17 00:00:00 2001
+From 42e43b2fec35c1e4cd4128543b2fa18a4feca3f5 Mon Sep 17 00:00:00 2001
 From: Sachi King <nakato@nakato.io>
 Date: Tue, 5 Oct 2021 00:22:57 +1100
 Subject: [PATCH] platform/surface: surfacepro3_button: don't load on amd
@@ -7049,7 +7441,7 @@ Patchset: surface-button
  1 file changed, 6 insertions(+), 24 deletions(-)
 
 diff --git a/drivers/platform/surface/surfacepro3_button.c b/drivers/platform/surface/surfacepro3_button.c
-index 242fb690dcaf..30eea54dbb47 100644
+index 2755601f979c..4240c98ca226 100644
 --- a/drivers/platform/surface/surfacepro3_button.c
 +++ b/drivers/platform/surface/surfacepro3_button.c
 @@ -149,7 +149,8 @@ static int surface_button_resume(struct device *dev)
@@ -7098,9 +7490,50 @@ index 242fb690dcaf..30eea54dbb47 100644
  
  
 -- 
-2.39.1
+2.39.2
 
-From 508af47129c868010d1b5508be0aa98bae95ce41 Mon Sep 17 00:00:00 2001
+From 5c2aeb5945079fcbe4aea9e5f7718c7ae3e9c372 Mon Sep 17 00:00:00 2001
+From: Maximilian Luz <luzmaximilian@gmail.com>
+Date: Sat, 18 Feb 2023 01:02:49 +0100
+Subject: [PATCH] USB: quirks: Add USB_QUIRK_DELAY_INIT for Surface Go 3
+ Type-Cover
+
+The touchpad on the Type-Cover of the Surface Go 3 is sometimes not
+being initialized properly. Apply USB_QUIRK_DELAY_INIT to fix this
+issue.
+
+More specifically, the device in question is a fairly standard modern
+touchpad with pointer and touchpad input modes. During setup, the device
+needs to be switched from pointer- to touchpad-mode (which is done in
+hid-multitouch) to fully utilize it as intended. Unfortunately, however,
+this seems to occasionally fail silently, leaving the device in
+pointer-mode. Applying USB_QUIRK_DELAY_INIT seems to fix this.
+
+Link: https://github.com/linux-surface/linux-surface/issues/1059
+Signed-off-by: Maximilian Luz <luzmaximilian@gmail.com>
+Patchset: surface-typecover
+---
+ drivers/usb/core/quirks.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/usb/core/quirks.c b/drivers/usb/core/quirks.c
+index 934b3d997702..2c6604c6e8e1 100644
+--- a/drivers/usb/core/quirks.c
++++ b/drivers/usb/core/quirks.c
+@@ -220,6 +220,9 @@ static const struct usb_device_id usb_quirk_list[] = {
+ 	/* Microsoft Surface Dock Ethernet (RTL8153 GigE) */
+ 	{ USB_DEVICE(0x045e, 0x07c6), .driver_info = USB_QUIRK_NO_LPM },
+ 
++	/* Microsoft Surface Go 3 Type-Cover */
++	{ USB_DEVICE(0x045e, 0x09b5), .driver_info = USB_QUIRK_DELAY_INIT },
++
+ 	/* Cherry Stream G230 2.0 (G85-231) and 3.0 (G85-232) */
+ 	{ USB_DEVICE(0x046a, 0x0023), .driver_info = USB_QUIRK_RESET_RESUME },
+ 
+-- 
+2.39.2
+
+From f8c5be357157f60b773228c5e44aeda8cc247690 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jonas=20Dre=C3=9Fler?= <verdre@v0yd.nl>
 Date: Thu, 5 Nov 2020 13:09:45 +0100
 Subject: [PATCH] hid/multitouch: Turn off Type Cover keyboard backlight when
@@ -7331,9 +7764,9 @@ index 372cbdd223e0..fe849df6a948 100644
  	{ .driver_data = MT_CLS_GOOGLE,
  		HID_DEVICE(HID_BUS_ANY, HID_GROUP_ANY, USB_VENDOR_ID_GOOGLE,
 -- 
-2.39.1
+2.39.2
 
-From be35cf4ec5d2a0bd1a11c4539f38bae8e8bcd0da Mon Sep 17 00:00:00 2001
+From b8b17dbdc07c7ec853fe9f0c8fb482774cb5766a Mon Sep 17 00:00:00 2001
 From: PJungkamp <p.jungkamp@gmail.com>
 Date: Fri, 25 Feb 2022 12:04:25 +0100
 Subject: [PATCH] hid/multitouch: Add support for surface pro type cover tablet
@@ -7631,9 +8064,106 @@ index fe849df6a948..3a7a43eb9fbe 100644
  	unregister_pm_notifier(&td->pm_notifier);
  	del_timer_sync(&td->release_timer);
 -- 
-2.39.1
+2.39.2
 
-From 64636abdc42f29ed3094d75fd8089f57dbae84df Mon Sep 17 00:00:00 2001
+From 6e1140afe49096e982583b4d2153e0615540de5a Mon Sep 17 00:00:00 2001
+From: Maximilian Luz <luzmaximilian@gmail.com>
+Date: Sun, 19 Feb 2023 22:12:24 +0100
+Subject: [PATCH] PCI: Add quirk to prevent calling shutdown mehtod
+
+Work around buggy EFI firmware: On some Microsoft Surface devices
+(Surface Pro 9 and Surface Laptop 5) the EFI ResetSystem call with
+EFI_RESET_SHUTDOWN doesn't function properly. Instead of shutting the
+system down, it returns and the system stays on.
+
+It turns out that this only happens after PCI shutdown callbacks ran for
+specific devices. Excluding those devices from the shutdown process
+makes the ResetSystem call work as expected.
+
+TODO: Maybe we can find a better way or the root cause of this?
+
+Not-Signed-off-by: Maximilian Luz <luzmaximilian@gmail.com>
+Patchset: surface-shutdown
+---
+ drivers/pci/pci-driver.c |  3 +++
+ drivers/pci/quirks.c     | 36 ++++++++++++++++++++++++++++++++++++
+ include/linux/pci.h      |  1 +
+ 3 files changed, 40 insertions(+)
+
+diff --git a/drivers/pci/pci-driver.c b/drivers/pci/pci-driver.c
+index a2ceeacc33eb..f3c8ad8c6032 100644
+--- a/drivers/pci/pci-driver.c
++++ b/drivers/pci/pci-driver.c
+@@ -507,6 +507,9 @@ static void pci_device_shutdown(struct device *dev)
+ 	struct pci_dev *pci_dev = to_pci_dev(dev);
+ 	struct pci_driver *drv = pci_dev->driver;
+ 
++	if (pci_dev->no_shutdown)
++		return;
++
+ 	pm_runtime_resume(dev);
+ 
+ 	if (drv && drv->shutdown)
+diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
+index 285acc4aaccc..7c8a5e8ef6b5 100644
+--- a/drivers/pci/quirks.c
++++ b/drivers/pci/quirks.c
+@@ -5992,3 +5992,39 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x9a2d, dpc_log_size);
+ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x9a2f, dpc_log_size);
+ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x9a31, dpc_log_size);
+ #endif
++
++static const struct dmi_system_id no_shutdown_dmi_table[] = {
++	/*
++	 * Systems on which some devices should not be touched during shutdown.
++	 */
++	{
++		.ident = "Microsoft Surface Pro 9",
++		.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "Microsoft Corporation"),
++			DMI_MATCH(DMI_PRODUCT_NAME, "Surface Pro 9"),
++		},
++	},
++	{
++		.ident = "Microsoft Surface Laptop 5",
++		.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "Microsoft Corporation"),
++			DMI_MATCH(DMI_PRODUCT_NAME, "Surface Laptop 5"),
++		},
++	},
++	{}
++};
++
++static void quirk_no_shutdown(struct pci_dev *dev)
++{
++	if (!dmi_check_system(no_shutdown_dmi_table))
++		return;
++
++	dev->no_shutdown = 1;
++	pci_info(dev, "disabling shutdown ops for [%04x:%04x]\n",
++		 dev->vendor, dev->device);
++}
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL, 0x461e, quirk_no_shutdown);  // Thunderbolt 4 USB Controller
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL, 0x461f, quirk_no_shutdown);  // Thunderbolt 4 PCI Express Root Port
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL, 0x462f, quirk_no_shutdown);  // Thunderbolt 4 PCI Express Root Port
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL, 0x466d, quirk_no_shutdown);  // Thunderbolt 4 NHI
++DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL, 0x46a8, quirk_no_shutdown);  // GPU
+diff --git a/include/linux/pci.h b/include/linux/pci.h
+index 254c8a4126a8..492a1c39a83d 100644
+--- a/include/linux/pci.h
++++ b/include/linux/pci.h
+@@ -464,6 +464,7 @@ struct pci_dev {
+ 	unsigned int	no_vf_scan:1;		/* Don't scan for VFs after IOV enablement */
+ 	unsigned int	no_command_memory:1;	/* No PCI_COMMAND_MEMORY */
+ 	unsigned int	rom_bar_overlap:1;	/* ROM BAR disable broken */
++	unsigned int	no_shutdown:1;		/* Do not touch device on shutdown */
+ 	pci_dev_flags_t dev_flags;
+ 	atomic_t	enable_cnt;	/* pci_enable_device has been called */
+ 
+-- 
+2.39.2
+
+From c6083e5449df5176fb983d6cc5e90493fdd52ce4 Mon Sep 17 00:00:00 2001
 From: Hans de Goede <hdegoede@redhat.com>
 Date: Sun, 10 Oct 2021 20:56:57 +0200
 Subject: [PATCH] ACPI: delay enumeration of devices with a _DEP pointing to an
@@ -7693,7 +8223,7 @@ Patchset: cameras
  1 file changed, 3 insertions(+)
 
 diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index dbfa58e799e2..ccbd3f8b523e 100644
+index 0c6f06abe3f4..4fc320f424e8 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
 @@ -2106,6 +2106,9 @@ static acpi_status acpi_bus_check_add_2(acpi_handle handle, u32 lvl_not_used,
@@ -7707,9 +8237,9 @@ index dbfa58e799e2..ccbd3f8b523e 100644
  	 * Do not enumerate devices with enumeration_by_parent flag set as
  	 * they will be enumerated by their respective parents.
 -- 
-2.39.1
+2.39.2
 
-From 0cafdc686d5a04558a617330b337fca92980cf74 Mon Sep 17 00:00:00 2001
+From e88abbaed5f9cec12fd13d7996224294802e951c Mon Sep 17 00:00:00 2001
 From: zouxiaoh <xiaohong.zou@intel.com>
 Date: Fri, 25 Jun 2021 08:52:59 +0800
 Subject: [PATCH] iommu: intel-ipu: use IOMMU passthrough mode for Intel IPUs
@@ -7735,7 +8265,7 @@ Patchset: cameras
  1 file changed, 30 insertions(+)
 
 diff --git a/drivers/iommu/intel/iommu.c b/drivers/iommu/intel/iommu.c
-index 408c321b929a..6e58effbe12b 100644
+index af91ed003861..15581d157ba5 100644
 --- a/drivers/iommu/intel/iommu.c
 +++ b/drivers/iommu/intel/iommu.c
 @@ -37,6 +37,12 @@
@@ -7751,7 +8281,7 @@ index 408c321b929a..6e58effbe12b 100644
  #define IS_IPTS(pdev) ((pdev)->vendor == PCI_VENDOR_ID_INTEL &&	\
  			    ((pdev)->device == 0x9d3e))
  #define IS_AZALIA(pdev) ((pdev)->vendor == 0x8086 && (pdev)->device == 0x3a3e)
-@@ -289,12 +295,14 @@ EXPORT_SYMBOL_GPL(intel_iommu_enabled);
+@@ -290,12 +296,14 @@ EXPORT_SYMBOL_GPL(intel_iommu_enabled);
  
  static int dmar_map_gfx = 1;
  static int dmar_map_ipts = 1;
@@ -7766,7 +8296,7 @@ index 408c321b929a..6e58effbe12b 100644
  #define IDENTMAP_IPTS		16
  
  const struct iommu_ops intel_iommu_ops;
-@@ -2635,6 +2643,9 @@ static int device_def_domain_type(struct device *dev)
+@@ -2589,6 +2597,9 @@ static int device_def_domain_type(struct device *dev)
  		if ((iommu_identity_mapping & IDENTMAP_GFX) && IS_GFX_DEVICE(pdev))
  			return IOMMU_DOMAIN_IDENTITY;
  
@@ -7776,7 +8306,7 @@ index 408c321b929a..6e58effbe12b 100644
  		if ((iommu_identity_mapping & IDENTMAP_IPTS) && IS_IPTS(pdev))
  			return IOMMU_DOMAIN_IDENTITY;
  	}
-@@ -3026,6 +3037,9 @@ static int __init init_dmars(void)
+@@ -2980,6 +2991,9 @@ static int __init init_dmars(void)
  	if (!dmar_map_gfx)
  		iommu_identity_mapping |= IDENTMAP_GFX;
  
@@ -7786,7 +8316,7 @@ index 408c321b929a..6e58effbe12b 100644
  	if (!dmar_map_ipts)
  		iommu_identity_mapping |= IDENTMAP_IPTS;
  
-@@ -4784,6 +4798,18 @@ static void quirk_iommu_igfx(struct pci_dev *dev)
+@@ -4809,6 +4823,18 @@ static void quirk_iommu_igfx(struct pci_dev *dev)
  	dmar_map_gfx = 0;
  }
  
@@ -7805,7 +8335,7 @@ index 408c321b929a..6e58effbe12b 100644
  static void quirk_iommu_ipts(struct pci_dev *dev)
  {
  	if (!IS_IPTS(dev))
-@@ -4795,6 +4821,7 @@ static void quirk_iommu_ipts(struct pci_dev *dev)
+@@ -4820,6 +4846,7 @@ static void quirk_iommu_ipts(struct pci_dev *dev)
  	pci_info(dev, "Passthrough IOMMU for IPTS\n");
  	dmar_map_ipts = 0;
  }
@@ -7813,7 +8343,7 @@ index 408c321b929a..6e58effbe12b 100644
  /* G4x/GM45 integrated gfx dmar support is totally busted. */
  DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x2a40, quirk_iommu_igfx);
  DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x2e00, quirk_iommu_igfx);
-@@ -4830,6 +4857,9 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x1632, quirk_iommu_igfx);
+@@ -4855,6 +4882,9 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x1632, quirk_iommu_igfx);
  DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x163A, quirk_iommu_igfx);
  DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x163D, quirk_iommu_igfx);
  
@@ -7824,9 +8354,9 @@ index 408c321b929a..6e58effbe12b 100644
  DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL, 0x9D3E, quirk_iommu_ipts);
  
 -- 
-2.39.1
+2.39.2
 
-From 9a06c70b9885d739c3764ffa59e67ec9cd2fc5fa Mon Sep 17 00:00:00 2001
+From 8ec05c9a4d04f9179293bb6f289ce5321e168f0c Mon Sep 17 00:00:00 2001
 From: Daniel Scally <djrscally@gmail.com>
 Date: Sun, 10 Oct 2021 20:57:02 +0200
 Subject: [PATCH] platform/x86: int3472: Enable I2c daisy chain
@@ -7861,9 +8391,9 @@ index 5b8d1a9620a5..6a0ff035cf20 100644
  
  	return 0;
 -- 
-2.39.1
+2.39.2
 
-From caffe75b60e8af020d64396acb89cdcd28dbd169 Mon Sep 17 00:00:00 2001
+From f3810fd14e8271c5667e3d62f8125988dd6c51ca Mon Sep 17 00:00:00 2001
 From: Daniel Scally <djrscally@gmail.com>
 Date: Thu, 28 Oct 2021 21:55:16 +0100
 Subject: [PATCH] media: i2c: Add driver for DW9719 VCM
@@ -7882,10 +8412,10 @@ Patchset: cameras
  create mode 100644 drivers/media/i2c/dw9719.c
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index d4822ae39e39..41e9ec6c55d5 100644
+index 135d93368d36..af817984d1e5 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
-@@ -6286,6 +6286,13 @@ T:	git git://linuxtv.org/media_tree.git
+@@ -6362,6 +6362,13 @@ T:	git git://linuxtv.org/media_tree.git
  F:	Documentation/devicetree/bindings/media/i2c/dongwoon,dw9714.yaml
  F:	drivers/media/i2c/dw9714.c
  
@@ -7900,10 +8430,10 @@ index d4822ae39e39..41e9ec6c55d5 100644
  M:	Dongchun Zhu <dongchun.zhu@mediatek.com>
  L:	linux-media@vger.kernel.org
 diff --git a/drivers/media/i2c/Kconfig b/drivers/media/i2c/Kconfig
-index 7806d4b81716..98d081efeef7 100644
+index 833241897d63..8cfd7b6c4bf5 100644
 --- a/drivers/media/i2c/Kconfig
 +++ b/drivers/media/i2c/Kconfig
-@@ -821,6 +821,17 @@ config VIDEO_DW9714
+@@ -847,6 +847,17 @@ config VIDEO_DW9714
  	  capability. This is designed for linear control of
  	  voice coil motors, controlled via I2C serial interface.
  
@@ -7922,7 +8452,7 @@ index 7806d4b81716..98d081efeef7 100644
  	tristate "DW9768 lens voice coil support"
  	depends on I2C && VIDEO_DEV
 diff --git a/drivers/media/i2c/Makefile b/drivers/media/i2c/Makefile
-index 0a2933103dd9..b82a07c76388 100644
+index 4d6c052bb5a7..29e4d61ce310 100644
 --- a/drivers/media/i2c/Makefile
 +++ b/drivers/media/i2c/Makefile
 @@ -30,6 +30,7 @@ obj-$(CONFIG_VIDEO_CS5345) += cs5345.o
@@ -8365,9 +8895,9 @@ index 000000000000..180b04d2a6b3
 +MODULE_DESCRIPTION("DW9719 VCM Driver");
 +MODULE_LICENSE("GPL");
 -- 
-2.39.1
+2.39.2
 
-From 2d07ffa30cb8a59392ddd1ab3fb7eb3aa4b8e6b9 Mon Sep 17 00:00:00 2001
+From 14b4cb6976a21fc04f2e7481032a1e3f3e083d38 Mon Sep 17 00:00:00 2001
 From: Daniel Scally <djrscally@gmail.com>
 Date: Wed, 4 May 2022 23:21:45 +0100
 Subject: [PATCH] media: ipu3-cio2: Move functionality from .complete() to
@@ -8480,9 +9010,9 @@ index 390bd5ea3472..76339fb842bf 100644
  
  static int cio2_parse_firmware(struct cio2_device *cio2)
 -- 
-2.39.1
+2.39.2
 
-From 55a2a464abfbec441776437cd32022ffa83e3861 Mon Sep 17 00:00:00 2001
+From 98fa14a45b8af9a7d5d5b9fb6c371c391aaef172 Mon Sep 17 00:00:00 2001
 From: Daniel Scally <djrscally@gmail.com>
 Date: Thu, 2 Jun 2022 22:15:56 +0100
 Subject: [PATCH] media: ipu3-cio2: Re-add .complete() to ipu3-cio2
@@ -8523,9 +9053,9 @@ index 76339fb842bf..eb7aa269ec2b 100644
  
  static int cio2_parse_firmware(struct cio2_device *cio2)
 -- 
-2.39.1
+2.39.2
 
-From 097ca9da260a84635b794201337a531084338ebd Mon Sep 17 00:00:00 2001
+From 5f837d5c2a8f85bc3448339032f20a120e104faf Mon Sep 17 00:00:00 2001
 From: Maximilian Luz <luzmaximilian@gmail.com>
 Date: Fri, 15 Jul 2022 23:48:00 +0200
 Subject: [PATCH] drivers/media/i2c: Fix DW9719 dependencies
@@ -8539,10 +9069,10 @@ Patchset: cameras
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/media/i2c/Kconfig b/drivers/media/i2c/Kconfig
-index 98d081efeef7..c67966cafe10 100644
+index 8cfd7b6c4bf5..11b8acd7cc5f 100644
 --- a/drivers/media/i2c/Kconfig
 +++ b/drivers/media/i2c/Kconfig
-@@ -823,7 +823,7 @@ config VIDEO_DW9714
+@@ -849,7 +849,7 @@ config VIDEO_DW9714
  
  config VIDEO_DW9719
  	tristate "DW9719 lens voice coil support"
@@ -8552,9 +9082,9 @@ index 98d081efeef7..c67966cafe10 100644
  	select VIDEO_V4L2_SUBDEV_API
  	select V4L2_ASYNC
 -- 
-2.39.1
+2.39.2
 
-From 956b57f8f337df7fd749cc2237be8f8175197927 Mon Sep 17 00:00:00 2001
+From f6270542aed1e088967e6ad7414ab9c27a8433fe Mon Sep 17 00:00:00 2001
 From: Sachi King <nakato@nakato.io>
 Date: Sat, 29 May 2021 17:47:38 +1000
 Subject: [PATCH] ACPI: Add quirk for Surface Laptop 4 AMD missing irq 7
@@ -8619,9 +9149,9 @@ index 907cc98b1938..0116d27b29ea 100644
  	mp_config_acpi_legacy_irqs();
  
 -- 
-2.39.1
+2.39.2
 
-From 1dee97b90576853578e36fe5b55615f5428d7b6b Mon Sep 17 00:00:00 2001
+From 613b0874db622956990fdafa7861044b3e1da0a2 Mon Sep 17 00:00:00 2001
 From: Maximilian Luz <luzmaximilian@gmail.com>
 Date: Thu, 3 Jun 2021 14:04:26 +0200
 Subject: [PATCH] ACPI: Add AMD 13" Surface Laptop 4 model to irq 7 override
@@ -8661,9 +9191,9 @@ index 0116d27b29ea..af102c6f8e5b 100644
  };
  
 -- 
-2.39.1
+2.39.2
 
-From 5e367b9e5bb01b82c19fe5de50aa5576f2daaf2a Mon Sep 17 00:00:00 2001
+From b94632809da3e6aa477c70531f183cbad242522d Mon Sep 17 00:00:00 2001
 From: "Bart Groeneveld | GPX Solutions B.V" <bart@gpxbv.nl>
 Date: Mon, 5 Dec 2022 16:08:46 +0100
 Subject: [PATCH] acpi: allow usage of acpi_tad on HW-reduced platforms
@@ -8770,5 +9300,5 @@ index e9b8e8305e23..944276934e7e 100644
  		ret = sysfs_create_group(&dev->kobj, &acpi_tad_dc_attr_group);
  		if (ret)
 -- 
-2.39.1
+2.39.2
 
